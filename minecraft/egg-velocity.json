@@ -20,14 +20,13 @@
         "pid_limit"
     ],
     "docker_images": {
-        "Java 8": "ghcr.io/parkervcp/yolks:java_8",
-        "Java 11": "ghcr.io/parkervcp/yolks:java_11",
-        "Java 16": "ghcr.io/parkervcp/yolks:java_16",
-        "Java 17": "ghcr.io/parkervcp/yolks:java_17",
         "Java 21": "ghcr.io/parkervcp/yolks:java_21",
-        "Java 25": "ghcr.io/parkervcp/yolks:java_25"
+        "Java 25": "cinammon-paper:java25",
+        "Java 17": "ghcr.io/parkervcp/yolks:java_17",
+        "Java 11": "ghcr.io/parkervcp/yolks:java_11"
     },
     "file_denylist": [],
+    "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -jar {{SERVER_JARFILE}}",
     "startup_commands": {
         "Default": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -XX:+UseG1GC -XX:G1HeapRegionSize=4M -XX:+UnlockExperimentalVMOptions -XX:+ParallelRefProcEnabled -XX:+AlwaysPreTouch -XX:MaxInlineLevel=15 -jar {{SERVER_JARFILE}}"
     },

@@ -17,12 +17,12 @@
         "pid_limit"
     ],
     "docker_images": {
-        "Java 17": "ghcr.io/parkervcp/yolks:java_17",
-        "Java 18": "ghcr.io/parkervcp/yolks:java_18",
         "Java 21": "ghcr.io/parkervcp/yolks:java_21",
-        "Java 25": "ghcr.io/parkervcp/yolks:java_25"
+        "Java 25": "cinammon-paper:java25",
+        "Java 17": "ghcr.io/parkervcp/yolks:java_17"
     },
     "file_denylist": [],
+    "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -Dterminal.jline=false -Dterminal.ansi=true -jar {{SERVER_JARFILE}}",
     "startup_commands": {
         "Default": "java -Xms128M -XX:MaxRAMPercentage=95.0 -Dterminal.jline=false -Dterminal.ansi=true -jar {{SERVER_JARFILE}}"
     },

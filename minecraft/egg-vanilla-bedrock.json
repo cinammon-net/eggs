@@ -16,8 +16,7 @@
         "pid_limit"
     ],
     "docker_images": {
-        "Java 25": "cinammon-paper:java25",
-        "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        "Debian": "ghcr.io/parkervcp/yolks:debian"
     },
     "file_denylist": [],
     "startup": "./bedrock_server",

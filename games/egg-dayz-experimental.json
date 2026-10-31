@@ -309,6 +309,16 @@
             "user_editable": false,
             "rules": "required|integer",
             "field_type": "text"
+        },
+        {
+            "name": "Client Mods",
+            "description": "Optional client-side mods to load (semicolon separated).",
+            "env_variable": "CLIENT_MODS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
         }
     ],
     "uuid": "c41f32eb-b786-43b0-bb1f-a2e44be63523"

@@ -179,6 +179,16 @@
             "user_editable": false,
             "rules": "required|string|max:20",
             "field_type": "text"
+        },
+        {
+            "name": "Additional Arguments",
+            "description": "Additional server startup arguments.",
+            "env_variable": "ADDITIONAL_ARGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
         }
     ],
     "uuid": "5d37268f-3ac2-46a7-bf5e-e822847928ad"
