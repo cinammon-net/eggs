@@ -19,25 +19,23 @@
         "pid_limit"
     ],
     "docker_images": {
-        "Java 25": "cinammon-paper:java25",
-        "ghcr.io/parkervcp/yolks:java_17": "ghcr.io/parkervcp/yolks:java_17",
-        "ghcr.io/parkervcp/yolks:java_16": "ghcr.io/parkervcp/yolks:java_16",
-        "ghcr.io/parkervcp/yolks:java_11": "ghcr.io/parkervcp/yolks:java_11",
-        "ghcr.io/parkervcp/yolks:java_8": "ghcr.io/parkervcp/yolks:java_8"
+        "Java 21": "ghcr.io/parkervcp/yolks:java_21",
+        "Java 25": "ghcr.io/parkervcp/yolks:java_25",
+        "Java 17": "ghcr.io/parkervcp/yolks:java_17"
     },
     "file_denylist": [],
     "startup": "java -Dterminal.ansi=true -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}}",
     "config": {
-        "files": "{}",
+        "files": "{\r\n    \"config.yml\": {\r\n        \"parser\": \"yaml\",\r\n        \"find\": {\r\n            \"listener.host\": \"0.0.0.0:{{server.build.default.port}}\"\r\n        }\r\n    }\r\n}",
         "startup": "{\r\n    \"done\": \"Started query on \"\r\n}",
         "logs": "{}",
         "stop": "end"
     },
     "scripts": {
         "installation": {
-            "script": "#!/bin/bash\r\n\r\n\r\nif [ ! -d /mnt/server ]; then\r\n    mkdir /mnt/server\r\nfi\r\n\r\ncd /mnt/server\r\n\r\n# Adding '.jar' if it isn't part of the file name\r\nif [[ \"${SERVER_JARFILE}\" == \"*\\.jar\" ]]; then\r\n    echo -e \"adding.jar to server file name\"\r\n    SERVER_JARFILE=\"${SERVER_JARFILE}.jar\"\r\nfi\r\n\r\nif [ -z \"${WATERDOG_VERSION}\" ] || [ \"${WATERDOG_VERSION}\" == \"latest\" ]; then\r\n    echo -e \"downloading latest waterdog pe build\\n\"\r\n    curl -sSL -o ${SERVER_JARFILE} https://jenkins.waterdog.dev/job/Waterdog/job/WaterdogPE/job/release/lastSuccessfulBuild/artifact/target/Waterdog.jar\r\nelse \r\n    echo -e \"downloading waterdog pe build ${WATERDOG_VERSION}\\n\"\r\n    curl -sSL -o ${SERVER_JARFILE} https://jenkins.waterdog.dev/job/Waterdog/job/WaterdogPE/job/release/${WATERDOG_VERSION}/artifact/target/Waterdog.jar\r\nfi\r\n\r\nif [ ! -f config.yml ]; then\r\n    echo -e \"Downloading waterdog pe config.yml\"\r\n   curl -o config.yml https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/minecraft/proxy/bedrock/waterdog_pe/config.yml\r\nelse\r\n    echo -e \"Waterfall config.yml exists. Will not pull a new file\"\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
-            "container": "ghcr.io/parkervcp/installers:debian",
-            "entrypoint": "bash"
+            "script": "#!/bin/ash\r\n\r\napk add --no-cache curl\r\n\r\nif [ ! -d /mnt/server ]; then\r\n    mkdir -p /mnt/server\r\nfi\r\n\r\ncd /mnt/server\r\n\r\n# Adding '.jar' if it isn't part of the file name\r\nif [ \"${SERVER_JARFILE##*.}\" != \"jar\" ]; then\r\n    echo \"adding .jar to server file name\"\r\n    SERVER_JARFILE=\"${SERVER_JARFILE}.jar\"\r\nfi\r\n\r\nif [ -z \"${WATERDOG_VERSION}\" ] || [ \"${WATERDOG_VERSION}\" = \"latest\" ]; then\r\n    echo \"downloading latest waterdog pe release\"\r\n    curl -sSL -o \"${SERVER_JARFILE}\" https://github.com/WaterdogPE/WaterdogPE/releases/download/latest/Waterdog.jar\r\nelse \r\n    echo \"downloading waterdog pe version ${WATERDOG_VERSION}\"\r\n    curl -sSL -o \"${SERVER_JARFILE}\" \"https://github.com/WaterdogPE/WaterdogPE/releases/download/${WATERDOG_VERSION}/Waterdog.jar\"\r\nfi\r\n\r\nif [ ! -f config.yml ]; then\r\n    echo \"Downloading waterdog pe config.yml\"\r\n    curl -sSL -o config.yml https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/minecraft/proxy/bedrock/waterdog_pe/config.yml\r\nelse\r\n    echo \"Waterdog config.yml exists. Will not pull a new file\"\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:alpine",
+            "entrypoint": "ash"
         }
     },
     "variables": [
