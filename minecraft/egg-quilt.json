@@ -10,12 +10,12 @@
     "description": "The Quilt project is an open-source, community-driven modding toolchain designed primarily for Minecraft. By focusing on speed, ease of use and modularity, Quilt aims to provide a sleek and modern modding toolchain with an open ecosystem.",
     "features": null,
     "docker_images": {
-        "Java 25": "cinammon-paper:java25",
+        "Java 25": "ghcr.io/parkervcp/yolks:java_25",
+        "Java 21": "ghcr.io/parkervcp/yolks:java_21",
         "Java 17": "ghcr.io/parkervcp/yolks:java_17",
         "Java 8": "ghcr.io/parkervcp/yolks:java_8",
         "Java 11": "ghcr.io/parkervcp/yolks:java_11",
-        "Java 16": "ghcr.io/parkervcp/yolks:java_16",
-        "Java 18": "ghcr.io/parkervcp/yolks:java_18"
+        "Java 16": "ghcr.io/parkervcp/yolks:java_16"
     },
     "file_denylist": [],
     "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -jar {{SERVER_JARFILE}} nogui",
@@ -27,9 +27,9 @@
     },
     "scripts": {
         "installation": {
-            "script": "#!/bin/bash\r\n# Quilt Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update\r\napt install -y wget\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nwget -O quilt.jar https://quiltmc.org/api/v1/download-latest-installer/java-universal\r\njava -jar quilt.jar \\\r\n  install server $MC_VERSION \\\r\n  --download-server\r\ncd /mnt/server/server\r\nmv * /mnt/server\r\ncd ..\r\nrm quilt.jar\r\nrmdir /mnt/server/server\r\nmv server.jar minecraft.jar\r\nmv quilt-server-launch.jar server.jar\r\necho \"serverJar=minecraft.jar\" > quilt-server-launcher.properties\r\necho -e \"Server is Ready!\"",
-            "container": "eclipse-temurin:18-jdk-jammy",
-            "entrypoint": "bash"
+            "script": "#!/bin/ash\r\n# Quilt Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napk add --no-cache openjdk21-jre-headless curl\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\ncurl -sSL -o quilt.jar https://quiltmc.org/api/v1/download-latest-installer/java-universal\r\njava -jar quilt.jar install server ${MC_VERSION} --download-server\r\n\r\nif [ -d /mnt/server/server ]; then\r\n    cd /mnt/server/server\r\n    mv * /mnt/server/\r\n    cd /mnt/server\r\n    rmdir /mnt/server/server\r\nfi\r\n\r\nrm -f quilt.jar\r\nif [ -f server.jar ] && [ -f quilt-server-launch.jar ]; then\r\n    mv server.jar minecraft.jar\r\n    mv quilt-server-launch.jar server.jar\r\n    echo \"serverJar=minecraft.jar\" > quilt-server-launcher.properties\r\nfi\r\n\r\necho \"Server is Ready!\"",
+            "container": "ghcr.io/parkervcp/installers:alpine",
+            "entrypoint": "ash"
         }
     },
     "variables": [
