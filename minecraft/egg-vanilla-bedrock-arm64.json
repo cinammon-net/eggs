@@ -21,8 +21,8 @@
     "file_denylist": [],
     "startup": "box64 ./bedrock_server",
     "config": {
-        "files": "{\r\n    \"server.properties\": {\r\n        \"parser\": \"properties\",\r\n        \"find\": {\r\n            \"server-port\": \"{{server.build.default.port}}\",\r\n            \"server-name\": \"{{server.environment.SERVERNAME}}\",\r\n            \"gamemode\": \"{{server.environment.GAMEMODE}}\",\r\n            \"difficulty\": \"{{server.environment.DIFFICULTY}}\",\r\n            \"allow-cheats\": \"{{server.environment.CHEATS}}\",\r\n            \"max-threads\": \"2\"\r\n        }\r\n    }\r\n}",
-        "startup": "{\r\n    \"done\": \"Server started\"\r\n}",
+        "files": "{\r\n    \"server.properties\": {\r\n        \"parser\": \"properties\",\r\n        \"find\": {\r\n            \"server-port\": \"{{server.build.default.port}}\",\r\n            \"server-name\": \"{{server.environment.SERVERNAME}}\",\r\n            \"gamemode\": \"{{server.environment.GAMEMODE}}\",\r\n            \"difficulty\": \"{{server.environment.DIFFICULTY}}\",\r\n            \"allow-cheats\": \"{{server.environment.CHEATS}}\",\r\n            \"content-log-console-output-enabled\": \"true\",\r\n            \"max-threads\": \"2\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"Accepting clients on \"\r\n}",
         "logs": "{}",
         "stop": "stop"
     },
