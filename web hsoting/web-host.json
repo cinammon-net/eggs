@@ -1,0 +1,115 @@
+{
+    "_comment": "FILE GENERATED FOR PELICAN PANEL (PLCN_v1)",
+    "meta": {
+        "version": "PLCN_v1",
+        "update_url": null
+    },
+    "exported_at": "2025-12-14T00:00:00Z",
+    "name": "WebHost (Nginx + PHP)",
+    "author": "cberny214@gmail.com",
+    "description": "Generic Web Hosting egg for Pelican Panel.\nSupports PHP, Composer, Git deployment and optional WordPress installation.",
+    "features": null,
+    "docker_images": {
+         "PHP 8.3 + Nginx": "ghcr.io/bernycampos/pelican-webhost:latest"
+    },
+    "file_denylist": [],
+    "startup": "{{STARTUP_CMD}}; if [[ ! -z ${COMPOSER_MODULES} ]]; then composer require ${COMPOSER_MODULES} --working-dir=/home/container/webroot; fi;",
+    "config": {
+        "files": "{\n    \"nginx/conf.d/default.conf\": {\n        \"parser\": \"file\",\n        \"find\": {\n            \"    listen \": \"    listen {{server.build.default.port}};\"\n        }\n    }\n}",
+        "startup": "{\n    \"done\": []\n}",
+        "logs": {
+            "custom": true,
+            "location": "/home/container/logs/nginx.log"
+        },
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/bash\nset -e\n\ncd /mnt/server\n\napt update\napt install -y git curl wget unzip ca-certificates\n\n# Clone base config repo\ngit clone https://github.com/BernyCampos/pelican-webhost ./temp\n\ncp -r ./temp/nginx /mnt/server/\ncp -r ./temp/php-fpm /mnt/server/\ncp -r ./temp/webroot /mnt/server/\ncp ./temp/start.sh /mnt/server/\nchmod +x /mnt/server/start.sh\n\nrm -rf ./temp\n\nmkdir -p /mnt/server/tmp\nmkdir -p /mnt/server/logs\n\n# WordPress install\nif [[ \"${WORDPRESS}\" == \"true\" || \"${WORDPRESS}\" == \"1\" ]]; then\n    echo \"Installing WordPress\"\n    cd /mnt/server/webroot\n    wget https://wordpress.org/latest.tar.gz\n    tar xzf latest.tar.gz\n    mv wordpress/* .\n    rm -rf wordpress latest.tar.gz\n    echo \"WordPress installed\"\n    exit 0\nfi\n\n# Skip install if user upload\nif [[ \"${USER_UPLOAD}\" == \"true\" || \"${USER_UPLOAD}\" == \"1\" ]]; then\n    echo \"User upload enabled, skipping install\"\n    exit 0\nfi\n\ncd /mnt/server/webroot\n\n# Git handling\nif [[ ! -z \"${GIT_ADDRESS}\" ]]; then\n    if [[ ${GIT_ADDRESS} != *.git ]]; then\n        GIT_ADDRESS=${GIT_ADDRESS}.git\n    fi\n\n    if [[ ! -z \"${USERNAME}\" && ! -z \"${ACCESS_TOKEN}\" ]]; then\n        GIT_ADDRESS=\"https://${USERNAME}:${ACCESS_TOKEN}@$(echo ${GIT_ADDRESS} | cut -d/ -f3-)\"\n    fi\n\n    if [[ -d .git ]]; then\n        ORIGIN=$(git config --get remote.origin.url)\n        if [[ \"${ORIGIN}\" == \"${GIT_ADDRESS}\" ]]; then\n            git pull\n        fi\n    else\n        if [[ -z \"${BRANCH}\" ]]; then\n            git clone ${GIT_ADDRESS} .\n        else\n            git clone --single-branch --branch ${BRANCH} ${GIT_ADDRESS} .\n        fi\n    fi\nfi\n\necho \"Installation complete\"\nexit 0",
+            "container": "ghcr.io/parkervcp/installers:ubuntu",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Startup Command",
+            "description": "Startup command (do not change unless you know what you are doing)",
+            "env_variable": "STARTUP_CMD",
+            "default_value": "./start.sh",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required",
+            "field_type": "text"
+        },
+        {
+            "name": "WordPress",
+            "description": "Enable WordPress installation\n0 = false\n1 = true",
+            "env_variable": "WORDPRESS",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Composer Modules",
+            "description": "Composer packages to install",
+            "env_variable": "COMPOSER_MODULES",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Git Repo Address",
+            "description": "Git repository URL",
+            "env_variable": "GIT_ADDRESS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Git Branch",
+            "description": "Branch to clone",
+            "env_variable": "BRANCH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "User Uploaded Files",
+            "description": "Skip install logic\n0 = false\n1 = true",
+            "env_variable": "USER_UPLOAD",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Git Username",
+            "description": "Git username",
+            "env_variable": "USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Git Access Token",
+            "description": "Git access token",
+            "env_variable": "ACCESS_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        }
+    ]
+}
