@@ -6,8 +6,8 @@
     },
     "exported_at": "2025-12-14T00:00:00Z",
     "name": "WebHost (Nginx + PHP)",
-    "author": "cberny214@gmail.com",
-    "description": "Generic Web Hosting egg for cinammon.net.\nSupports PHP, Composer, Git deployment and optional WordPress installation.",
+    "author": "support@cinammon.net",
+    "description": "Hosting web con Nginx + PHP 8.3 de Cinammon. Sube tu web a webroot/ por el Administrador de archivos o SFTP, instala WordPress con un clic o despliega desde un repositorio Git.",
     "features": null,
     "docker_images": {
         "PHP 8.3 + Nginx": "ghcr.io/bernycampos/pelican-webhost:latest"
@@ -25,91 +25,110 @@
     },
     "scripts": {
         "installation": {
-            "script": "#!/bin/bash\nset -e\n\ncd /mnt/server\n\napt update\napt install -y git curl wget unzip ca-certificates\n\n# Clone base config repo\ngit clone https://github.com/BernyCampos/pelican-webhost ./temp\n\ncp -r ./temp/nginx /mnt/server/\ncp -r ./temp/php-fpm /mnt/server/\ncp -r ./temp/webroot /mnt/server/\ncp ./temp/start.sh /mnt/server/\nchmod +x /mnt/server/start.sh\n\nrm -rf ./temp\n\nmkdir -p /mnt/server/tmp\nmkdir -p /mnt/server/logs\n\n# WordPress install\nif [[ \"${WORDPRESS}\" == \"true\" || \"${WORDPRESS}\" == \"1\" ]]; then\n    echo \"Installing WordPress\"\n    cd /mnt/server/webroot\n    wget https://wordpress.org/latest.tar.gz\n    tar xzf latest.tar.gz\n    mv wordpress/* .\n    rm -rf wordpress latest.tar.gz\n    echo \"WordPress installed\"\n    exit 0\nfi\n\n# Skip install if user upload\nif [[ \"${USER_UPLOAD}\" == \"true\" || \"${USER_UPLOAD}\" == \"1\" ]]; then\n    echo \"User upload enabled, skipping install\"\n    exit 0\nfi\n\ncd /mnt/server/webroot\n\n# Git handling\nif [[ ! -z \"${GIT_ADDRESS}\" ]]; then\n    if [[ ${GIT_ADDRESS} != *.git ]]; then\n        GIT_ADDRESS=${GIT_ADDRESS}.git\n    fi\n\n    if [[ ! -z \"${USERNAME}\" && ! -z \"${ACCESS_TOKEN}\" ]]; then\n        GIT_ADDRESS=\"https://${USERNAME}:${ACCESS_TOKEN}@$(echo ${GIT_ADDRESS} | cut -d/ -f3-)\"\n    fi\n\n    if [[ -d .git ]]; then\n        ORIGIN=$(git config --get remote.origin.url)\n        if [[ \"${ORIGIN}\" == \"${GIT_ADDRESS}\" ]]; then\n            git pull\n        fi\n    else\n        if [[ -z \"${BRANCH}\" ]]; then\n            git clone ${GIT_ADDRESS} .\n        else\n            git clone --single-branch --branch ${BRANCH} ${GIT_ADDRESS} .\n        fi\n    fi\nfi\n\necho \"Installation complete\"\nexit 0",
+            "script": "#!/bin/bash\n# Cinammon WebHost · instalación\nset -e\ncd /mnt/server\n\necho \"▸ Preparando dependencias…\"\napt-get update -qq\napt-get install -y -qq git curl wget unzip ca-certificates >/dev/null\n\necho \"▸ Descargando la configuración base de Nginx y PHP-FPM…\"\nrm -rf ./temp\ngit clone --depth 1 https://github.com/BernyCampos/pelican-webhost ./temp\n# La configuración se actualiza siempre; los archivos de tu web (webroot/) nunca se sobrescriben.\nrm -rf /mnt/server/nginx /mnt/server/php-fpm\ncp -r ./temp/nginx /mnt/server/\ncp -r ./temp/php-fpm /mnt/server/\nmkdir -p /mnt/server/webroot /mnt/server/tmp /mnt/server/logs\nrm -rf ./temp\n\necho \"▸ Instalando el arranque de Cinammon…\"\ncat > /mnt/server/start.sh <<'CINAMMON_START_EOF'\n#!/bin/ash\n# Cinammon WebHost · arranque de PHP-FPM + Nginx\nP='\\033[1;35m'; C='\\033[1;36m'; G='\\033[0;32m'; Y='\\033[1;33m'; R='\\033[0;31m'; D='\\033[2m'; N='\\033[0m'\nok()   { echo -e \"${G}  ✔ $1${N}\"; }\nwarn() { echo -e \"${Y}  ⚠ $1${N}\"; }\nfail() { echo -e \"${R}  ✖ $1${N}\"; }\n\necho -e \"${P}\"\necho -e \"   ╔═════════════════════════════════════╗\"\necho -e \"   ║        ${C}C I N A M M O N${P}  ·  WEBHOST      ║\"\necho -e \"   ╚═════════════════════════════════════╝${N}\"\necho -e \"${D}   Nginx + PHP $(php -r 'echo PHP_VERSION;' 2>/dev/null)${N}\\n\"\n\necho -e \"${C}▸ Limpiando temporales…${N}\"\nmkdir -p /home/container/tmp /home/container/logs\nrm -rf /home/container/tmp/* && ok \"Temporales limpios\" || warn \"No se pudieron limpiar los temporales\"\n\nif [ ! -f /home/container/webroot/index.php ] && [ ! -f /home/container/webroot/index.html ]; then\n    warn \"webroot/ no tiene index.php ni index.html: sube tu web desde Archivos o por SFTP.\"\nfi\n\necho -e \"${C}▸ Iniciando PHP-FPM…${N}\"\nif /usr/sbin/php-fpm8 --fpm-config /home/container/php-fpm/php-fpm.conf --daemonize; then\n    ok \"PHP-FPM en marcha\"\nelse\n    fail \"PHP-FPM no arrancó. Revisa php-fpm/php-fpm.conf\"\n    exit 1\nfi\n\necho -e \"${C}▸ Iniciando Nginx…${N}\"\nif /usr/sbin/nginx -t -c /home/container/nginx/nginx.conf -p /home/container/ >/dev/null 2>&1; then\n    ok \"Configuración de Nginx correcta\"\nelse\n    fail \"Error en la configuración de Nginx:\"\n    /usr/sbin/nginx -t -c /home/container/nginx/nginx.conf -p /home/container/\n    exit 1\nfi\n\necho -e \"\\n${G}  ● Web en línea${N}  ${C}http://${SERVER_IP:-tu-ip}:${SERVER_PORT:-puerto}${N}\"\necho -e \"${D}    Archivos de la web: webroot/   ·   Registros: logs/${N}\\n\"\n/usr/sbin/nginx -c /home/container/nginx/nginx.conf -p /home/container/\n\ntail -f /dev/null\nCINAMMON_START_EOF\nchmod +x /mnt/server/start.sh\n\ncd /mnt/server/webroot\n\n# Página de bienvenida: solo si webroot está vacío o tiene la de ejemplo.\nput_welcome() {\ncat > /mnt/server/webroot/index.php <<'CINAMMON_INDEX_EOF'\n<?php\n$site = htmlspecialchars(getenv('SITE_NAME') ?: 'Mi web en Cinammon', ENT_QUOTES, 'UTF-8');\n$php = PHP_VERSION;\n$port = htmlspecialchars($_SERVER['SERVER_PORT'] ?? '', ENT_QUOTES, 'UTF-8');\n?><!doctype html>\n<html lang=\"es\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n<title><?= $site ?> · Cinammon WebHost</title>\n<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n<link href=\"https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;500;600&display=swap\" rel=\"stylesheet\">\n<style>\n:root{--bg:#04060d;--card:#0a0e1c;--line:rgba(255,255,255,.08);--text:#e2e8f0;--muted:#94a3b8;--pink:#ff2d95;--cyan:#00f7ff;--violet:#a855f7}\n*{box-sizing:border-box}html,body{margin:0}\nbody{min-height:100vh;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;display:flex;align-items:center;justify-content:center;padding:32px 16px;overflow-x:hidden}\nbody:before{content:\"\";position:fixed;inset:0;background:radial-gradient(600px 400px at 15% 10%,rgba(0,247,255,.12),transparent 60%),radial-gradient(600px 400px at 85% 90%,rgba(255,45,149,.12),transparent 60%),radial-gradient(circle,rgba(255,255,255,.07) 1px,transparent 1px) 0 0/24px 24px;pointer-events:none}\n.wrap{position:relative;width:100%;max-width:760px}\n.top{height:1px;background:linear-gradient(90deg,transparent,var(--pink),var(--cyan),transparent);margin-bottom:28px}\n.badge{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(0,247,255,.35);background:rgba(0,247,255,.08);color:var(--cyan);border-radius:999px;padding:6px 14px;font:600 11px Orbitron,sans-serif;letter-spacing:.18em;text-transform:uppercase}\n.dot{width:8px;height:8px;border-radius:50%;background:#34d399;box-shadow:0 0 10px #34d399;animation:p 1.6s infinite}@keyframes p{50%{opacity:.35}}\nh1{font:900 clamp(28px,6vw,46px)/1.1 Orbitron,sans-serif;margin:18px 0 10px;letter-spacing:.02em}\nh1 span{background:linear-gradient(90deg,var(--pink),var(--violet),var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}\n.lead{color:var(--muted);font-size:16px;line-height:1.6;margin:0 0 28px}\n.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}\n.card{background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.01));border:1px solid var(--line);border-radius:16px;padding:18px;transition:border-color .2s,transform .2s}\n.card:hover{border-color:rgba(255,45,149,.45);transform:translateY(-2px)}\n.n{font:700 12px Orbitron,sans-serif;color:var(--pink);letter-spacing:.15em}\n.card h2{font:700 15px Orbitron,sans-serif;margin:8px 0 6px}\n.card p{margin:0;color:var(--muted);font-size:13.5px;line-height:1.55}\ncode{font:500 12.5px ui-monospace,Menlo,monospace;color:var(--cyan);background:rgba(0,247,255,.08);border:1px solid rgba(0,247,255,.2);border-radius:6px;padding:1px 6px}\n.stats{display:flex;flex-wrap:wrap;gap:10px;margin:26px 0}\n.stat{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:10px 14px;font-size:12px;color:var(--muted)}\n.stat b{display:block;color:var(--text);font:700 14px Orbitron,sans-serif;margin-top:2px}\n.cta{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font:700 13px Orbitron,sans-serif;color:#fff;background:linear-gradient(90deg,var(--pink),#c026d3);border-radius:12px;padding:12px 20px;box-shadow:0 0 22px rgba(255,45,149,.35)}\n.cta.alt{background:transparent;border:1px solid rgba(0,247,255,.45);color:var(--cyan);box-shadow:none}\n.actions{display:flex;flex-wrap:wrap;gap:12px}\nfooter{margin-top:34px;color:#64748b;font-size:12px}\nfooter a{color:var(--muted)}\n</style>\n</head>\n<body>\n<main class=\"wrap\">\n  <div class=\"top\"></div>\n  <span class=\"badge\"><span class=\"dot\"></span> Online · Cinammon WebHost</span>\n  <h1><?= $site ?><br><span>ya está en línea</span></h1>\n  <p class=\"lead\">Tu servidor web (Nginx + PHP) funciona. Esta es la página de bienvenida: sustitúyela por tu web siguiendo uno de estos caminos.</p>\n\n  <div class=\"grid\">\n    <div class=\"card\"><div class=\"n\">01</div><h2>Sube tus archivos</h2><p>En el panel: <b>Archivos</b> → carpeta <code>webroot/</code>. O por SFTP (puerto <code>2022</code>) con los datos de <b>Acceso SFTP</b>. Borra este <code>index.php</code>.</p></div>\n    <div class=\"card\"><div class=\"n\">02</div><h2>Instala WordPress</h2><p>En <b>Inicio</b> pon <code>Instalar WordPress</code> a <code>1</code> y pulsa <b>Reinstalar</b>. Necesitarás una base de datos (pestaña <b>Bases de datos</b>).</p></div>\n    <div class=\"card\"><div class=\"n\">03</div><h2>Despliega con Git</h2><p>Pon la URL de tu repositorio en <code>Repositorio Git</code> y reinstala. Para repos privados, añade usuario y token.</p></div>\n  </div>\n\n  <div class=\"stats\">\n    <div class=\"stat\">PHP<b><?= htmlspecialchars($php, ENT_QUOTES, 'UTF-8') ?></b></div>\n    <div class=\"stat\">Servidor<b>Nginx</b></div>\n    <?php if ($port): ?><div class=\"stat\">Puerto<b><?= $port ?></b></div><?php endif; ?>\n    <div class=\"stat\">Subida máx.<b>100 MB</b></div>\n  </div>\n\n  <div class=\"actions\">\n    <a class=\"cta\" href=\"https://panel.cinammon.net/servers\" target=\"_blank\" rel=\"noopener\">Abrir mi panel →</a>\n    <a class=\"cta alt\" href=\"https://store.cinammon.net/store/web\" target=\"_blank\" rel=\"noopener\">Ampliar mi plan</a>\n  </div>\n\n  <footer>Alojado en <a href=\"https://cinammon.net\" target=\"_blank\" rel=\"noopener\">Cinammon Network</a> · Infraestructura cloud para comunidades.</footer>\n</main>\n</body>\n</html>\nCINAMMON_INDEX_EOF\n}\n\nif [[ \"${WORDPRESS}\" == \"true\" || \"${WORDPRESS}\" == \"1\" ]]; then\n    if [[ -f wp-config.php || -f wp-config-sample.php ]]; then\n        echo \"✔ WordPress ya estaba instalado: no se toca.\"\n    else\n        echo \"▸ Instalando WordPress (última versión en español)…\"\n        wget -q https://es.wordpress.org/latest-es_ES.tar.gz -O wp.tar.gz || wget -q https://wordpress.org/latest.tar.gz -O wp.tar.gz\n        tar xzf wp.tar.gz\n        rm -f index.php\n        cp -r wordpress/. .\n        rm -rf wordpress wp.tar.gz\n        echo \"✔ WordPress instalado. Abre tu web para terminar la configuración (crea antes una base de datos en el panel).\"\n    fi\nelif [[ \"${USER_UPLOAD}\" == \"true\" || \"${USER_UPLOAD}\" == \"1\" ]]; then\n    echo \"✔ Modo «solo mis archivos»: webroot/ no se modifica.\"\nelif [[ -n \"${GIT_ADDRESS}\" ]]; then\n    [[ ${GIT_ADDRESS} != *.git ]] && GIT_ADDRESS=${GIT_ADDRESS}.git\n    if [[ -n \"${USERNAME}\" && -n \"${ACCESS_TOKEN}\" ]]; then\n        GIT_ADDRESS=\"https://${USERNAME}:${ACCESS_TOKEN}@$(echo ${GIT_ADDRESS} | cut -d/ -f3-)\"\n    fi\n    if [[ -d .git ]]; then\n        echo \"▸ Actualizando el repositorio…\"\n        git pull\n    elif [[ -z \"$(ls -A .)\" || ( -f index.php && $(ls -A | wc -l) -eq 1 && $(grep -c -E 'Berny WebHost|Cinammon WebHost' index.php) -gt 0 ) ]]; then\n        rm -f index.php\n        echo \"▸ Clonando el repositorio…\"\n        if [[ -z \"${BRANCH}\" ]]; then git clone ${GIT_ADDRESS} .; else git clone --single-branch --branch ${BRANCH} ${GIT_ADDRESS} .; fi\n    else\n        echo \"⚠ webroot/ ya tiene archivos y no es un repositorio Git: no se clona para no borrar nada.\"\n    fi\nelse\n    if [[ -z \"$(ls -A .)\" ]] || grep -q -E 'Berny WebHost|Cinammon WebHost' index.php 2>/dev/null; then\n        put_welcome\n        echo \"✔ Página de bienvenida de Cinammon creada en webroot/index.php\"\n    else\n        echo \"✔ webroot/ ya tiene tu web: no se modifica.\"\n    fi\nfi\n\necho \"✔ Instalación completada\"\n",
             "container": "ghcr.io/parkervcp/installers:ubuntu",
             "entrypoint": "bash"
         }
     },
     "variables": [
         {
-            "name": "Startup Command",
-            "description": "Startup command (do not change unless you know what you are doing)",
+            "name": "Comando de arranque",
+            "description": "Lo gestiona Cinammon. No se puede editar.",
             "env_variable": "STARTUP_CMD",
             "default_value": "./start.sh",
-            "user_viewable": true,
-            "user_editable": true,
+            "user_viewable": false,
+            "user_editable": false,
             "rules": "required",
-            "field_type": "text"
+            "field_type": "text",
+            "sort": 1
         },
         {
-            "name": "WordPress",
-            "description": "Enable WordPress installation\n0 = false\n1 = true",
+            "name": "Nombre de tu web",
+            "description": "Se muestra en la página de bienvenida.",
+            "env_variable": "SITE_NAME",
+            "default_value": "Mi web en Cinammon",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:60",
+            "field_type": "text",
+            "sort": 2
+        },
+        {
+            "name": "Instalar WordPress",
+            "description": "1 = instalar WordPress al reinstalar (en español). 0 = no. Crea antes una base de datos en el panel.",
             "env_variable": "WORDPRESS",
             "default_value": "0",
             "user_viewable": true,
             "user_editable": true,
             "rules": "required|boolean",
-            "field_type": "text"
+            "field_type": "text",
+            "sort": 3
         },
         {
-            "name": "Composer Modules",
-            "description": "Composer packages to install",
-            "env_variable": "COMPOSER_MODULES",
-            "default_value": "",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": "nullable|string",
-            "field_type": "text"
-        },
-        {
-            "name": "Git Repo Address",
-            "description": "Git repository URL",
+            "name": "Repositorio Git",
+            "description": "URL del repositorio para desplegar tu web en webroot/ al reinstalar (ej.: https://github.com/usuario/mi-web). Vacío = no usar Git.",
             "env_variable": "GIT_ADDRESS",
             "default_value": "",
             "user_viewable": true,
             "user_editable": true,
             "rules": "nullable|string",
-            "field_type": "text"
+            "field_type": "text",
+            "sort": 4
         },
         {
-            "name": "Git Branch",
-            "description": "Branch to clone",
+            "name": "Rama de Git",
+            "description": "Rama a desplegar. Vacío = la rama principal.",
             "env_variable": "BRANCH",
             "default_value": "",
             "user_viewable": true,
             "user_editable": true,
             "rules": "nullable|string",
-            "field_type": "text"
+            "field_type": "text",
+            "sort": 5
         },
         {
-            "name": "User Uploaded Files",
-            "description": "Skip install logic\n0 = false\n1 = true",
-            "env_variable": "USER_UPLOAD",
-            "default_value": "0",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": "required|boolean",
-            "field_type": "text"
-        },
-        {
-            "name": "Git Username",
-            "description": "Git username",
+            "name": "Usuario de Git",
+            "description": "Solo para repositorios privados.",
             "env_variable": "USERNAME",
             "default_value": "",
             "user_viewable": true,
             "user_editable": true,
             "rules": "nullable|string",
-            "field_type": "text"
+            "field_type": "text",
+            "sort": 6
         },
         {
-            "name": "Git Access Token",
-            "description": "Git access token",
+            "name": "Token de Git",
+            "description": "Solo para repositorios privados: token de acceso personal (no tu contraseña).",
             "env_variable": "ACCESS_TOKEN",
             "default_value": "",
             "user_viewable": true,
             "user_editable": true,
             "rules": "nullable|string",
-            "field_type": "text"
+            "field_type": "text",
+            "sort": 7
+        },
+        {
+            "name": "Solo mis archivos",
+            "description": "1 = al reinstalar no se toca nada de webroot/ (ni bienvenida, ni Git, ni WordPress). 0 = normal.",
+            "env_variable": "USER_UPLOAD",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text",
+            "sort": 8
+        },
+        {
+            "name": "Paquetes de Composer",
+            "description": "Paquetes PHP a instalar al arrancar, separados por espacios (ej.: guzzlehttp/guzzle). Vacío = ninguno.",
+            "env_variable": "COMPOSER_MODULES",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text",
+            "sort": 9
         }
     ],
     "image": "data:image/png;base64,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"
