@@ -1,0 +1,554 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY FOR CINAMMON.NET",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": "https://raw.githubusercontent.com/cinammon-net/eggs/main/games/egg-humanitz.json"
+    },
+    "uuid": "9c32d3d9-6f74-58bf-ab2a-2153d77a54f2",
+    "exported_at": "2024-06-01T00:04:20+00:00",
+    "name": "HumanitZ",
+    "author": "engels74@marx.ps",
+    "description": "HumanitZ is a co-op, isometric, open world survival game in a world ended by the zombie outbreak. As one of the few human survivors, try to last as long as “humanly” possible. The past can’t be changed, but you can make a difference today for the future of humanity.",
+    "features": null,
+    "docker_images": {
+        "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+    },
+    "file_denylist": [],
+    "startup": "./TSSGame/Binaries/Linux/TSSGameServer-Linux-Shipping TSSGame -log -port={{SERVER_PORT}} -queryport={{QUERY_PORT}} -steamservername=\"{{SERVER_NAME}}\"",
+    "config": {
+        "files": "{\r\n    \"TSSGame/GameServerSettings.ini\": {\r\n        \"parser\": \"ini\",\r\n        \"find\": {\r\n            \"[Host Settings].ServerName\": \"{{server.build.env.SERVER_NAME}}\",\r\n            \"[Host Settings].Password\": \"{{server.build.env.PASSWORD}}\",\r\n            \"[Host Settings].SaveName\": \"{{server.build.env.SAVE_NAME}}\",\r\n            \"[Host Settings].AdminPass\": \"{{server.build.env.ADMIN_PASS}}\",\r\n            \"[Host Settings].MaxPlayers\": \"{{server.build.env.MAX_PLAYERS}}\",\r\n            \"[Host Settings].OnlyAllowedPlayers\": \"{{server.build.env.ONLY_ALLOWED_PLAYERS}}\",\r\n            \"[World Settings].SaveIntervalSec\": \"{{server.build.env.SAVE_INTERVAL_SEC}}\",\r\n            \"[World Settings].NoDeathFeedback\": \"{{server.build.env.NO_DEATH_FEEDBACK}}\",\r\n            \"[World Settings].PermaDeath\": \"{{server.build.env.PERMA_DEATH}}\",\r\n            \"[World Settings].OnDeath\": \"{{server.build.env.ON_DEATH}}\",\r\n            \"[World Settings].PVP\": \"{{server.build.env.PVP}}\",\r\n            \"[World Settings].ClearInfection\": \"{{server.build.env.CLEAR_INFECTION}}\",\r\n            \"[World Settings].EagleEye\": \"{{server.build.env.EAGLE_EYE}}\",\r\n            \"[World Settings].AirDrop\": \"{{server.build.env.AIR_DROP}}\",\r\n            \"[World Settings].WeaponBreak\": \"{{server.build.env.WEAPON_BREAK}}\",\r\n            \"[World Settings].MultiplayerSleep\": \"{{server.build.env.MULTIPLAYER_SLEEP}}\",\r\n            \"[World Settings].LootRespawn\": \"{{server.build.env.LOOT_RESPAWN}}\",\r\n            \"[World Settings].LootRespawnTimer\": \"{{server.build.env.LOOT_RESPAWN_TIMER}}\",\r\n            \"[World Settings].PickupRespawnTimer\": \"{{server.build.env.PICKUP_RESPAWN_TIMER}}\",\r\n            \"[World Settings].LootRarity\": \"{{server.build.env.LOOT_RARITY}}\",\r\n            \"[World Settings].AirDropInterval\": \"{{server.build.env.AIR_DROP_INTERVAL}}\",\r\n            \"[World Settings].ZombieDiffHealth\": \"{{server.build.env.ZOMBIE_DIFF_HEALTH}}\",\r\n            \"[World Settings].ZombieDiffSpeed\": \"{{server.build.env.ZOMBIE_DIFF_SPEED}}\",\r\n            \"[World Settings].ZombieDiffDamage\": \"{{server.build.env.ZOMBIE_DIFF_DAMAGE}}\",\r\n            \"[World Settings].HumanDifficulty\": \"{{server.build.env.HUMAN_DIFFICULTY}}\",\r\n            \"[World Settings].ZombieAmountMulti\": \"{{server.build.env.ZOMBIE_AMOUNT_MULTI}}\",\r\n            \"[World Settings].HumanAmountMulti\": \"{{server.build.env.HUMAN_AMOUNT_MULTI}}\",\r\n            \"[World Settings].ZombieDogMulti\": \"{{server.build.env.ZOMBIE_DOG_MULTI}}\",\r\n            \"[World Settings].ZombieRespawnTimer\": \"{{server.build.env.ZOMBIE_RESPAWN_TIMER}}\",\r\n            \"[World Settings].HumanRespawnTimer\": \"{{server.build.env.HUMAN_RESPAWN_TIMER}}\",\r\n            \"[World Settings].AnimalRespawnTimer\": \"{{server.build.env.ANIMAL_RESPAWN_TIMER}}\",\r\n            \"[World Settings].StartingSeason\": \"{{server.build.env.STARTING_SEASON}}\",\r\n            \"[World Settings].DaysPerSeason\": \"{{server.build.env.DAYS_PER_SEASON}}\",\r\n            \"[World Settings].DayDur\": \"{{server.build.env.DAY_DUR}}\",\r\n            \"[World Settings].NightDur\": \"{{server.build.env.NIGHT_DUR}}\",\r\n            \"[World Settings].VitalDrain\": \"{{server.build.env.VITAL_DRAIN}}\",\r\n            \"[World Settings].DogEnabled\": \"{{server.build.env.DOG_ENABLED}}\",\r\n            \"[World Settings].DogNum\": \"{{server.build.env.DOG_NUM}}\",\r\n            \"[World Settings].RecruitDog\": \"{{server.build.env.RECRUIT_DOG}}\",\r\n            \"[World Settings].BuildingHealth\": \"{{server.build.env.BUILDING_HEALTH}}\",\r\n            \"[World Settings].CompanionHealth\": \"{{server.build.env.COMPANION_HEALTH}}\",\r\n            \"[World Settings].CompanionDmg\": \"{{server.build.env.COMPANION_DMG}}\",\r\n            \"[World Settings].AllowDismantle\": \"{{server.build.env.ALLOW_DISMANTLE}}\",\r\n            \"[World Settings].AllowHouseDismantle\": \"{{server.build.env.ALLOW_HOUSE_DISMANTLE}}\",\r\n            \"[World Settings].Territory\": \"{{server.build.env.TERRITORY}}\",\r\n            \"[World Settings].Decay\": \"{{server.build.env.DECAY}}\",\r\n            \"[World Settings].PickupCleanup\": \"{{server.build.env.PICKUP_CLEANUP}}\",\r\n            \"[World Settings].FakeBuildingCleanup\": \"{{server.build.env.FAKE_BUILDING_CLEANUP}}\"\r\n        }\r\n    }\r\n}",
+        "logs": "{}",
+        "startup": "{\r\n    \"done\": \"LogKaiHelper: Session created!\"\r\n}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit \r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## making server files executable\r\nchmod +x /mnt/server/TSSGame/Binaries/Linux/TSSGameServer-Linux-Shipping\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+        }
+    },
+    "variables": [
+        {
+            "name": "[REQUIRED] Steam App ID",
+            "description": "Steam App ID of HumanitZ Server",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2728330",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:2728330",
+            "field_type": "text"
+        },
+        {
+            "name": "Auto Update",
+            "description": "Enable automatic updates on boot",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "[REQUIRED] Steam Beta Branch",
+            "description": "This ensures the script will grab the Linux version of the server",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "linuxbranch",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:linuxbranch",
+            "field_type": "text"
+        },
+        {
+            "name": "[REQUIRED] Steam Query Port",
+            "description": "Steam Query Port",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Name",
+            "description": "Name of the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "HumanitZ [Dedicated]",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Password",
+            "description": "Server password (if any)",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Save Name",
+            "description": "Name of the save-file for the server",
+            "env_variable": "SAVE_NAME",
+            "default_value": "DedicatedSaveMP",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Admin Password",
+            "description": "Password for the admin",
+            "env_variable": "ADMIN_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Players",
+            "description": "Maximum number of players allowed",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "16",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Only Allowed Players",
+            "description": "Restrict server to allowed players only",
+            "env_variable": "ONLY_ALLOWED_PLAYERS",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Saving World Interval",
+            "description": "Save game every x seconds.",
+            "env_variable": "SAVE_INTERVAL_SEC",
+            "default_value": "300",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Permanent Death",
+            "description": "0=Off, 1=Individual perma-death, 2=All players experience perma-death",
+            "env_variable": "PERMA_DEATH",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "On Death",
+            "description": "0=Only lose backpack, and weapon in hand, 1=Previous + pockets, and backpack, 2=All previous + Equipment",
+            "env_variable": "ON_DEATH",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "PvP",
+            "description": "0/1 Off/On. Enable or disable Player vs Player.",
+            "env_variable": "PVP",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Clear Infection",
+            "description": "0=Respawning does not rid you of the infection, 1=You lose it upon respawning",
+            "env_variable": "CLEAR_INFECTION",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Eagle Eye",
+            "description": "1=Able to purchase the eagle eye skill, 0=You can't",
+            "env_variable": "EAGLE_EYE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Air Drop",
+            "description": "1=Enabled, 0=Disabled. Controls whether air drops are enabled.",
+            "env_variable": "AIR_DROP",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Weapon Durability",
+            "description": "1=Weapons break when reaching 0% durability except crowbar, 0=Only improvised weapons break at 0% durability",
+            "env_variable": "WEAPON_BREAK",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Multiplayer Sleep",
+            "description": "1=Time passes if everyone performs the sleep emote at the same time, 0=Passing time is disabled",
+            "env_variable": "MULTIPLAYER_SLEEP",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Building Health",
+            "description": "Health multiplier of player placed buildings. By default set to \"1\".",
+            "env_variable": "BUILDING_HEALTH",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Loot Respawn",
+            "description": "1=Loot does respawn, 0=Never respawn",
+            "env_variable": "LOOT_RESPAWN",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Loot Respawn Timer",
+            "description": "If loot respawns how long does it take in minutes",
+            "env_variable": "LOOT_RESPAWN_TIMER",
+            "default_value": "60",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Pickup Respawn Timer",
+            "description": "Time in minutes it takes to respawn pickups, 0 to disable.",
+            "env_variable": "PICKUP_RESPAWN_TIMER",
+            "default_value": "90",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Loot Rarity",
+            "description": "0=Scarce, 1=Low, 2=Default, 3=Plentiful, 4=Abundant",
+            "env_variable": "LOOT_RARITY",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Air Drop Interval",
+            "description": "Air drop every X day",
+            "env_variable": "AIR_DROP_INTERVAL",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Zombie Difficulty (Health)",
+            "description": "0=Very Easy, 1=Easy, 2=Default, 3=Hard, 4=Very Hard, 5=Nightmare",
+            "env_variable": "ZOMBIE_DIFF_HEALTH",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Zombie Difficulty (Speed)",
+            "description": "0=Very Easy, 1=Easy, 2=Default, 3=Hard, 4=Very Hard, 5=Nightmare",
+            "env_variable": "ZOMBIE_DIFF_SPEED",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Zombie Difficulty (Damage)",
+            "description": "0=Very Easy, 1=Easy, 2=Default, 3=Hard, 4=Very Hard, 5=Nightmare",
+            "env_variable": "ZOMBIE_DIFF_DAMAGE",
+            "default_value": "3",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Human Difficulty",
+            "description": "0=Very Easy, 1=Easy, 2=Default, 3=Hard, 4=Very Hard, 5=Nightmare",
+            "env_variable": "HUMAN_DIFFICULTY",
+            "default_value": "3",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Zombie Amount Multiplier",
+            "description": "Zombie spawn count multiplier",
+            "env_variable": "ZOMBIE_AMOUNT_MULTI",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Human Amount Multiplier",
+            "description": "Hostile humans spawn count multiplier",
+            "env_variable": "HUMAN_AMOUNT_MULTI",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Zombie Dog Multiplier",
+            "description": "Zombie dog spawn count multiplier",
+            "env_variable": "ZOMBIE_DOG_MULTI",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Zombie Respawn Timer",
+            "description": "Time in minutes for zombies to respawn",
+            "env_variable": "ZOMBIE_RESPAWN_TIMER",
+            "default_value": "90",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Human Respawn Timer",
+            "description": "Time in minutes for hostile humans to respawn",
+            "env_variable": "HUMAN_RESPAWN_TIMER",
+            "default_value": "90",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Animal Respawn Timer",
+            "description": "Time in minutes for animals to respawn",
+            "env_variable": "ANIMAL_RESPAWN_TIMER",
+            "default_value": "90",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Starting Season",
+            "description": "0=Summer, 1=Autum, 2=Winter, 3=Spring",
+            "env_variable": "STARTING_SEASON",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Days Per Season",
+            "description": "How many days each season lasts",
+            "env_variable": "DAYS_PER_SEASON",
+            "default_value": "5",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Day Duration",
+            "description": "Day duration in minutes",
+            "env_variable": "DAY_DUR",
+            "default_value": "40",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Night Duration",
+            "description": "Night duration in minutes",
+            "env_variable": "NIGHT_DUR",
+            "default_value": "20",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Vital Drain",
+            "description": "How fast your vitals drain 0=Slow, 1=Normal, 2=Fast",
+            "env_variable": "VITAL_DRAIN",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Dog Companions Enabled",
+            "description": "Enable finding dog companions you can recruit",
+            "env_variable": "DOG_ENABLED",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Dog Companion Amount",
+            "description": "Number of companion dogs that could spawn randomly",
+            "env_variable": "DOG_NUM",
+            "default_value": "8",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Recruit Companion Dogs",
+            "description": "Allow players to recruit companion dog",
+            "env_variable": "RECRUIT_DOG",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Companion Health",
+            "description": "Dog companion health - 0=Low 1=Default 2=High",
+            "env_variable": "COMPANION_HEALTH",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Companion Damage",
+            "description": "Dog companion damage - 0=Low 1=Default 2=High",
+            "env_variable": "COMPANION_DMG",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "No Death Feedback",
+            "description": "0 to enable player died notification in chat - 1 to disable player died notification in chat.",
+            "env_variable": "NO_DEATH_FEEDBACK",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Allow Dismantle",
+            "description": "1 = Enable players to dismantle their own buildings, 0 = Disable",
+            "env_variable": "ALLOW_DISMANTLE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Allow House Dismantle",
+            "description": "1 = Players are able to dismantle house props, 0 = Disable",
+            "env_variable": "ALLOW_HOUSE_DISMANTLE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Territory",
+            "description": "1 = Enabled. In PVE you are not allowed to build in someone's spawn point area. Only non recruit clan members can. 0 = Disable",
+            "env_variable": "TERRITORY",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Decay",
+            "description": "By default 3600, the crafted \"Spawn Point\" loses 1 durability every 1 hour. This is used to deal with territory build restrictions, so players have to repair their spawn point.",
+            "env_variable": "DECAY",
+            "default_value": "3600",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Pickup Cleanup",
+            "description": "How long in minutes it takes for dropped pickups to be destroyed (Pickups part of the world will not be considered), a value of 0 means no cleanup is done.",
+            "env_variable": "PICKUP_CLEANUP",
+            "default_value": "3000",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Fake Building Cleanup",
+            "description": "How long in minutes it takes for the white blueprint building to be destroyed, a value of 0 means no cleanup is done.",
+            "env_variable": "FAKE_BUILDING_CLEANUP",
+            "default_value": "3000",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        }
+    ],
+    "image": "data:image/png;base64,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"
+}

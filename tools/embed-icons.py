@@ -61,6 +61,18 @@ def to_data_uri(raw: bytes) -> str:
     return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
 
 
+def guess_source(egg: dict, rel: str) -> str:
+    """Sin entrada en icons.json: AppID de Steam del egg o bloque de Minecraft."""
+    if rel.startswith("minecraft" + os.sep):
+        return "minecraft"
+    for var in egg.get("variables") or []:
+        if isinstance(var, dict) and var.get("env_variable") in ("SRCDS_APPID", "STEAM_APPID", "APPID"):
+            appid = str(var.get("default_value") or "").strip()
+            if appid.isdigit():
+                return f"steam:{appid}"
+    return ""
+
+
 def main() -> int:
     force = "--force" in sys.argv
     sheet = sys.argv[sys.argv.index("--sheet") + 1] if "--sheet" in sys.argv else None
@@ -78,7 +90,7 @@ def main() -> int:
         if egg.get("image") and not force:
             tiles.append((name, egg["image"]))
             continue
-        source = sources.get(name)
+        source = sources.get(name) or guess_source(egg, rel)
         if not source:
             failed.append(f"{rel}: sin fuente (usa el icono de categoría)")
             continue

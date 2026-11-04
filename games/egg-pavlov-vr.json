@@ -1,0 +1,96 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY FOR CINAMMON.NET",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": "https://raw.githubusercontent.com/cinammon-net/eggs/main/games/egg-pavlov-vr.json"
+    },
+    "uuid": "91fd60ab-d6d5-5e47-a92d-dc6104b73d8b",
+    "exported_at": "2024-06-01T00:04:34+00:00",
+    "name": "Pavlov VR",
+    "author": "admin@devil.wtf",
+    "description": "Pavlov VR is a multiplayer shooter in VR with heavy focus on community features. Realistic reloading features and fast paced combat as part of the core experience. Play the #1 most popular VR shooter on PC today.",
+    "features": [
+        "steam_disk_space"
+    ],
+    "docker_images": {
+        "ghcr.io/parkervcp/steamcmd:ubuntu": "ghcr.io/parkervcp/steamcmd:ubuntu"
+    },
+    "file_denylist": [],
+    "startup": "./Pavlov/Binaries/Linux/PavlovServer-Linux-Shipping  Pavlov -PORT={{SERVER_PORT}} -KEY=\"{{API_KEY}}\"",
+    "config": {
+        "files": "{\r\n    \"Pavlov/Saved/Config/RconSettings.txt\": {\r\n        \"parser\": \"file\",\r\n        \"find\": {\r\n            \"Password=\": \"Password={{env.RCON_PASSWORD}}\",\r\n            \"Port=\": \"Port={{env.RCON_PORT}}\"\r\n        }\r\n    }\r\n}",
+        "logs": "{}",
+        "startup": "{\r\n    \"done\": \"Starting Server Status Helper on Port\"\r\n}",
+        "stop": "^^C"
+    },
+    "scripts": {
+        "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\nchmod +x \"/mnt/server/Pavlov/Binaries/Linux/PavlovServer-Linux-Shipping\"\r\n\r\n# Install Configuration Files\r\nmkdir -p /mnt/server/Pavlov/Saved/Logs\r\nmkdir -p /mnt/server/Pavlov/Saved/Config/LinuxServer\r\nmkdir -p /mnt/server/Pavlov/Saved/maps\r\n\r\n\r\ncd /mnt/server/Pavlov/Saved/Config/LinuxServer\r\nif [ ! -f Game.ini ]; then\r\n    echo -e \"Downloading Pavlov VR Game.ini\"\r\n    curl -ssL -o Game.ini https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/steamcmd_servers/pavlov_vr/Game.ini\r\nfi\r\n\r\ncd /mnt/server/Pavlov/Saved/Config\r\nif [ ! -f RconSettings.txt ]; then\r\n    echo -e \"Downloading Pavlov VR RconSettings.txt\"\r\n    curl -ssL -o RconSettings.txt https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/steamcmd_servers/pavlov_vr/RconSettings.txt\r\nfi\r\n\r\ncd /mnt/server/\r\nif [ -f PavlovServer.sh ]; then\r\n    rm PavlovServer.sh\r\nfi\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+        }
+    },
+    "variables": [
+        {
+            "name": "App ID",
+            "description": "Pavlov VR steam app id",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "622970",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:622970",
+            "field_type": "text"
+        },
+        {
+            "name": "RCON Password",
+            "description": "Enter a password for your RCON Configuration.",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "CHANGE_ME",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "RCON Port",
+            "description": "Port for your RCON Configuration.",
+            "env_variable": "RCON_PORT",
+            "default_value": "8188",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Auto-update server",
+            "description": "This is to enable auto-updating for servers.\r\n\r\nDefault is 0. Set to 1 to update",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Beta id",
+            "description": "Beta branch of a steam app",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|in:,beta_server",
+            "field_type": "text"
+        },
+        {
+            "name": "Api key",
+            "description": "For your server to show up in the server list, there is now a requirement to have an ApiKey issued by vankrupt. This is to prevent DOS attacks against the master server.\r\nGet it here: https://pavlov-ms.vankrupt.com/servers/v1/key",
+            "env_variable": "API_KEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+        }
+    ],
+    "image": "data:image/png;base64,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"
+}

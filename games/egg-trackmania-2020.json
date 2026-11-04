@@ -1,0 +1,151 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY FOR CINAMMON.NET",
+    "meta": {
+        "version": "PLCN_v2",
+        "update_url": "https://raw.githubusercontent.com/cinammon-net/eggs/main/games/egg-trackmania-2020.json"
+    },
+    "uuid": "40475c2e-1409-5819-bb50-7e5fc104a0f0",
+    "exported_at": "2025-09-28T14:19:00+00:00",
+    "name": "Trackmania (2020)",
+    "author": "pelican@stather.me",
+    "description": "Trackmania is a free-to-play game that combines racing and creation. Compete on over 1000 community-made tracks, create your own with the editor, and join clubs and events online.",
+    "tags": [],
+    "features": [],
+    "docker_images": {
+        "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+    },
+    "file_denylist": [],
+    "startup": "./TrackmaniaServer /nodaemon /dedicated_cfg=dedicated_cfg.xml /game_settings={{MATCH_SETTINGS}} /servername=\"{{SERVER_NAME}}\"",
+    "config": {
+        "files": "{\n    \"UserData/Config/dedicated_cfg.xml\": {\n        \"parser\": \"xml\",\n        \"find\": {\n            \"dedicated.server_options.name\": \"{{server.environment.SERVER_NAME}}\",\n            \"dedicated.server_options.password\": \"{{server.environment.SERVER_PASSWORD}}\",\n            \"dedicated.server_options.password_spectator\": \"{{server.environment.SPECTATOR_PASSWORD}}\",\n            \"dedicated.server_options.max_players\": \"{{server.environment.MAX_PLAYERS}}\",\n            \"dedicated.server_options.max_spectators\": \"{{server.environment.MAX_SPECTATORS}}\",\n            \"dedicated.system_config.server_port\": \"{{server.allocations.default.port}}\",\n            \"dedicated.system_config.xmlrpc_port\": \"{{server.environment.XMLRPC_PORT}}\",\n            \"dedicated.masterserver_account.login\": \"{{server.environment.MASTER_SERVER_LOGIN}}\",\n            \"dedicated.masterserver_account.password\": \"{{server.environment.MASTER_SERVER_PASSWORD}}\"\n        }\n    }\n}",
+        "startup": "{\"done\": \"...Load succeeds\"}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/bash\r\n# Server files: /mnt/server\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nwget http://files.v04.maniaplanet.com/server/TrackmaniaServer_Latest.zip\r\nunzip -o TrackmaniaServer_Latest.zip\r\nrm TrackmaniaServer_Latest.zip\r\nchmod 755 TrackmaniaServer\r\n\r\ncp -n UserData/Config/dedicated_cfg.default.txt UserData/Config/dedicated_cfg.xml\r\ncp -n UserData/Maps/MatchSettings/example.txt  UserData/Maps/matchsettings.xml\r\necho \"Finished Installing.\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Master Server Login",
+            "description": "Login to https://www.trackmania.com/player/dedicated-servers to make a login and password",
+            "env_variable": "MASTER_SERVER_LOGIN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "string",
+                "required"
+            ],
+            "sort": 7
+        },
+        {
+            "name": "Master Server Password",
+            "description": "",
+            "env_variable": "MASTER_SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "string",
+                "required"
+            ],
+            "sort": 8
+        },
+        {
+            "name": "Match settings",
+            "description": "",
+            "env_variable": "MATCH_SETTINGS",
+            "default_value": "matchsettings.xml",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "string",
+                "required"
+            ],
+            "sort": 9
+        },
+        {
+            "name": "Max Players",
+            "description": "",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": [
+                "integer",
+                "required"
+            ],
+            "sort": 4
+        },
+        {
+            "name": "Max Spectators",
+            "description": "",
+            "env_variable": "MAX_SPECTATORS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": [
+                "integer",
+                "required"
+            ],
+            "sort": 5
+        },
+        {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Trackmania Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "required",
+                "string"
+            ],
+            "sort": 1
+        },
+        {
+            "name": "Server Password",
+            "description": "",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "string"
+            ],
+            "sort": 2
+        },
+        {
+            "name": "Spectator Password",
+            "description": "",
+            "env_variable": "SPECTATOR_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "string"
+            ],
+            "sort": 3
+        },
+        {
+            "name": "XMLRPC Port",
+            "description": "",
+            "env_variable": "XMLRPC_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": [
+                "integer",
+                "required",
+                "between:1024,65535"
+            ],
+            "sort": 6
+        }
+    ],
+    "image": "data:image/png;base64,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"
+}

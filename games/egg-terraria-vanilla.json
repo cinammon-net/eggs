@@ -1,0 +1,124 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY FOR CINAMMON.NET",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": "https://raw.githubusercontent.com/cinammon-net/eggs/main/games/egg-terraria-vanilla.json"
+    },
+    "uuid": "f2761bfa-3554-5911-982c-ec97431b9db6",
+    "exported_at": "2024-06-01T00:17:13+00:00",
+    "name": "Terraria Vanilla",
+    "author": "iamkubi@gmail.com",
+    "description": "Dig, fight, explore, build! Nothing is impossible in this action-packed adventure game.",
+    "features": null,
+    "docker_images": {
+        "Debian": "ghcr.io/parkervcp/yolks:debian"
+    },
+    "file_denylist": [],
+    "startup": "./TerrariaServer.bin.x86_64 -config serverconfig.txt",
+    "config": {
+        "files": "{\r\n    \"serverconfig.txt\": {\r\n        \"parser\": \"properties\",\r\n        \"find\": {\r\n            \"worldpath\": \"/home/container/saves/Worlds\",\r\n            \"worldname\": \"{{server.build.env.WORLD_NAME}}\",\r\n            \"world\": \"/home/container/saves/Worlds/{{server.build.env.WORLD_NAME}}.wld\",\r\n            \"difficulty\": \"{{server.build.env.WORLD_DIFFICULTY}}\",\r\n            \"autocreate\": \"{{server.build.env.WORLD_SIZE}}\",\r\n            \"port\": \"{{server.build.default.port}}\",\r\n            \"maxplayers\": \"{{server.build.env.MAX_PLAYERS}}\",\r\n            \"motd\": \"{{server.build.env.SERVER_MOTD}}\",\r\n            \"seed\": \"{{server.build.env.WORLD_SEED}}\",\r\n            \"password\": \"{{server.build.env.PASSWORD}}\",\r\n            \"npcstream\": \"{{server.build.env.NPCSTREAM}}\"\r\n        }\r\n    }\r\n}",
+        "logs": "{}",
+        "startup": "{\r\n    \"done\": \"Type 'help' for a list of commands\"\r\n}",
+        "stop": "exit"
+    },
+    "scripts": {
+        "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# Vanilla Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n## install packages to get version and download links\r\napt update\r\napt install -y curl wget file unzip jq\r\n\r\nDOWNLOAD_LINK=invalid\r\n\r\nmkdir -p /mnt/server/\r\ncd /mnt/server/\r\n\r\nif [ \"${TERRARIA_VERSION}\" == \"latest\" ] || [ \"${TERRARIA_VERSION}\" == \"\" ] ; then\r\n    V=$(curl -sSL https://terraria.org/api/get/dedicated-servers-names | jq -r .[] | head -1)\r\n    DOWNLOAD_LINK=\"https://terraria.org/api/download/pc-dedicated-server/${V}\"\r\nelse\r\n    CLEAN_VERSION=$(echo ${TERRARIA_VERSION} | sed 's/\\.//g')\r\n    echo -e \"Downloading terraria server files\"\r\n    DOWNLOAD_LINK=$(curl -sSL https://terraria.wiki.gg/wiki/Server#Downloads | grep '>Terraria Server ' | grep -Eoi '<a [^>]+>' | grep -Eo 'href=\\\"[^\\\\\\\"]+\\\"' | grep -Eo '(http|https):\\/\\/[^\\\"]+' | grep \"${CLEAN_VERSION}\" | cut -d'?' -f1)\r\nfi \r\n\r\n## this is a simple script to validate a download url actaully exists\r\necho ${DOWNLOAD_LINK}\r\n\r\nif [ ! -z \"${DOWNLOAD_LINK}\" ]; then \r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_LINK}; then\r\n        echo -e \"link is valid.\"\r\n    else        \r\n        echo -e \"link is invalid closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\nCLEAN_VERSION=$(echo ${DOWNLOAD_LINK##*/} | cut -d'-' -f3 | cut -d'.' -f1)\r\n\r\n\r\necho -e \"running 'curl -sSL ${DOWNLOAD_LINK} -o ${DOWNLOAD_LINK##*/}'\" \r\ncurl -sSL ${DOWNLOAD_LINK} -o ${DOWNLOAD_LINK##*/}\r\n\r\necho -e \"Unpacking server files\"\r\nunzip ${DOWNLOAD_LINK##*/}\r\n\r\necho -e \"\"\r\ncp -R ${CLEAN_VERSION}/Linux/* ./\r\nchmod +x TerrariaServer.bin.x86_64\r\n\r\necho -e \"Cleaning up extra files.\"\r\nrm -rf ${CLEAN_VERSION}\r\n\r\necho -e \"Generating config file\"\r\ncat <<EOF > serverconfig.txt\r\nworldpath=/home/container/saves/Worlds\r\nworldname=default\r\nworld=/home/container/saves/Worlds/default.wld\r\ndifficulty=3\r\nautocreate=1\r\nport=7777\r\nmaxplayers=8\r\nEOF\r\n\r\nmkdir -p /mnt/server/saves/Worlds\r\n\r\necho -e \"Install complete\""
+        }
+    },
+    "variables": [
+        {
+            "name": "Terraria version",
+            "description": "the version of Terraria that is to be used.\r\n\r\nYou can use the full version number or the file number. (ex. 1.3.5.3 or 1353)\r\n\r\nGet version numbers here - https://terraria.wiki.gg/wiki/Server#Downloads",
+            "env_variable": "TERRARIA_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "World Name",
+            "description": "The name for the world file.",
+            "env_variable": "WORLD_NAME",
+            "default_value": "world",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Players",
+            "description": "The maximum number of players a server will hold.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "8",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|max:255",
+            "field_type": "text"
+        },
+        {
+            "name": "World Size",
+            "description": "Defines the worlds size. 3 sizes 1 (small), 2 (medium), 3 (large).",
+            "env_variable": "WORLD_SIZE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|in:1,2,3",
+            "field_type": "text"
+        },
+        {
+            "name": "Difficulty",
+            "description": "World Difficulty\r\n\r\nOptions: 0(normal), 1(expert), 2(master), 3(journey)",
+            "env_variable": "WORLD_DIFFICULTY",
+            "default_value": "3",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|in:0,1,2,3",
+            "field_type": "text"
+        },
+        {
+            "name": "MOTD",
+            "description": "Server MOTD",
+            "env_variable": "SERVER_MOTD",
+            "default_value": "Welcome!",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+        },
+        {
+            "name": "World Seed",
+            "description": "The Seed to use when creating the World",
+            "env_variable": "WORLD_SEED",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Password",
+            "description": "The password which should be used.",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "NPCStream",
+            "description": "Reduces enemy skipping but increases bandwidth usage. The lower the number the less skipping will happen, but more data is sent. 0 is off.",
+            "env_variable": "NPCSTREAM",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|int|between:0,60",
+            "field_type": "text"
+        }
+    ],
+    "image": "data:image/png;base64,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"
+}

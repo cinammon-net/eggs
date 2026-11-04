@@ -1,0 +1,136 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY FOR CINAMMON.NET",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": "https://raw.githubusercontent.com/cinammon-net/eggs/main/games/egg-starrupture.json"
+    },
+    "uuid": "435fba44-c252-5524-8336-91d82c0e475d",
+    "exported_at": "2026-02-07T22:43:26+01:00",
+    "name": "StarRupture",
+    "author": "volyzos@gmail.com",
+    "description": "StarRupture is a first-person open world base-building game with advanced combat and tons of exploration. Play alone or in a group on this sublime and ever-changing planet, extract and manage resources, create your complex industrial system and fight off hordes of alien monsters. Developed by Creepy Jar.",
+    "features": [
+        "steam_disk_space"
+    ],
+    "docker_images": {
+        "ghcr.io/parkervcp/steamcmd:proton": "ghcr.io/parkervcp/steamcmd:proton"
+    },
+    "file_denylist": [],
+    "startup": "proton run ./StarRupture/Binaries/Win64/StarRuptureServerEOS-Win64-Shipping.exe -Log -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -RCWebControlDisable -RCWebInterfaceDisable & SR_PID=$!; tail -c0 -F ./StarRupture/Saved/Logs/StarRupture.log --pid=$SR_PID",
+    "config": {
+        "files": "{\r\n    \"DSSettings.txt\": {\r\n        \"parser\": \"json\",\r\n        \"find\": {\r\n            \"SessionName\": \"{{server.build.env.DSS_SERVER_NAME}}\",\r\n            \"SaveGameInterval\": \"{{server.build.env.DSS_SAVE_INTERVAL}}\",\r\n            \"StartNewGame\": \"{{server.build.env.DSS_CREATE_NEW_GAME}}\",\r\n            \"LoadSavedGame\": \"{{server.build.env.DSS_LOAD_SAVED_GAME}}\",\r\n            \"SaveGameName\": \"{{server.build.env.DSS_SAVE_FILE_NAME}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"LogCommonSession: OnUpdateSessionComplete(SessionName: GameSession, bWasSuccessful: true\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/bash\r\n# StarRupture Dedicated Server Installation Script\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\necho \"-----------------------------------------\"\r\necho \"StarRupture Dedicated Server Installer\"\r\necho \"Proton Version\"\r\necho \"-----------------------------------------\"\r\n\r\n## Set Steam user for anonymous login\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"Steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"User set to ${STEAM_USER}\"\r\nfi\r\n\r\n## Download and install SteamCMD\r\necho \"-----------------------------------------\"\r\necho \"Installing SteamCMD...\"\r\necho \"-----------------------------------------\"\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## Install game server using SteamCMD\r\necho \"-----------------------------------------\"\r\necho \"Installing StarRupture Dedicated Server...\"\r\necho \"-----------------------------------------\"\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) validate +quit\r\n\r\n## Set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## Set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## create DSSettings.txt\r\nif [ ! -f /mnt/server/DSSettings.txt ]; then\r\n    echo \"Creating default DSSettings.txt\"\r\n    cat << EOF > /mnt/server/DSSettings.txt\r\n    {\r\n        \"SessionName\": \"StarRuptureServer\",\r\n        \"SaveGameInterval\": \"300\",\r\n        \"StartNewGame\": \"false\",\r\n        \"LoadSavedGame\": \"true\",\r\n        \"SaveGameName\": \"AutoSave0.sav\"\r\n    }\r\nEOF\r\nfi\r\n\r\n## Installation complete\r\necho \"-----------------------------------------\"\r\necho \"Installation completed!\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Steam App ID",
+            "description": "The Steam App ID for StarRupture Dedicated Server. Do not change.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "3809400",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:3809400",
+            "field_type": "text"
+        },
+        {
+            "name": "Windows Install",
+            "description": "Required for Windows game server installation via SteamCMD.",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|in:1",
+            "field_type": "text"
+        },
+        {
+            "name": "Auto Update",
+            "description": "Automatically update the server on startup.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Query Port",
+            "description": "Steam query port for server browser. May not be required for EOS-based servers.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|between:1024,65535",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Name",
+            "description": "The display name of your server.",
+            "env_variable": "DSS_SERVER_NAME",
+            "default_value": "StarRupture Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Load saved game",
+            "description": "DSSettings option to load an existing save. (Must be the opposite of Create new game)",
+            "env_variable": "DSS_LOAD_SAVED_GAME",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Beta Branch",
+            "description": "Optional: Set to a beta branch name to install a beta version of the server.",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Create new game",
+            "description": "DSSettings option to force the creation of a new game. (Must be the opposite of Create new game)\r\nOnce a game and a save is created, you have to disable create game and load game instead to avoid problems",
+            "env_variable": "DSS_CREATE_NEW_GAME",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Game Save interval",
+            "description": "Time between automatic saves in seconds",
+            "env_variable": "DSS_SAVE_INTERVAL",
+            "default_value": "300",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Save filename",
+            "description": "The save file filename on the disk. Useful if you create/import multiple saves and want to load a specific one.\r\n(Must end with .sav)",
+            "env_variable": "DSS_SAVE_FILE_NAME",
+            "default_value": "AutoSave0.sav",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        }
+    ],
+    "image": "data:image/png;base64,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"
+}

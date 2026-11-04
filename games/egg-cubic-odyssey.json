@@ -1,0 +1,215 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY FOR CINAMMON.NET",
+    "meta": {
+        "version": "PLCN_v3",
+        "update_url": "https://raw.githubusercontent.com/cinammon-net/eggs/main/games/egg-cubic-odyssey.json"
+    },
+    "uuid": "ba461607-2d3e-5e4a-aa45-dea894dcd347",
+    "exported_at": "2026-04-06T02:01:23+00:00",
+    "name": "Cubic Odyssey",
+    "author": "mads@mrnissen.com",
+    "description": "Adventure, creation, and survival await!\nStep into a boundless open world where every planet, every system, and every moment is yours to shape. Explore a universe rich with life, ancient mysteries, and untamed beauty. Fight back the Red Darkness menace as you mine resources, craft tools, weapons, and build vehicles that are essential for your odyssey. Collaborate with friends to battle colossal threats and bring hope to the galaxy.",
+    "image": "data:image/png;base64,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",
+    "tags": [
+        "steamcmd"
+    ],
+    "features": [
+        "steam_disk_space"
+    ],
+    "docker_images": {
+        "Wine Latest": "ghcr.io/pelican-eggs/yolks:wine_latest",
+        "Wine Staging": "ghcr.io/pelican-eggs/yolks:wine_staging"
+    },
+    "file_denylist": [],
+    "config": {
+        "files": "{\n    \"config/server_config.txt\": {\n        \"parser\": \"file\",\n        \"find\": {\n            \"\\t\\tstartingPort\": \"\\t\\tstartingPort {{env.STARTING_PORT}}\",\n            \"\\t\\tendingPort\": \"\\t\\tendingPort {{env.ENDING_PORT}}\",\n            \"\\t\\tserverName\": \"\\t\\tserverName \\\"{{env.SERVER_NAME}}\\\"\",\n            \"\\t\\tserverPassword\": \"\\t\\tserverPassword \\\"{{env.SERVER_PASSWORD}}\\\"\",\n            \"\\t\\tmaxPlayers\": \"\\t\\tmaxPlayers {{env.MAX_PLAYERS}}\",\n            \"\\t\\tgameMode\": \"\\t\\tgameMode {{env.GAME_MODE}}\",\n            \"\\t\\tprivateServer\": \"\\t\\tprivateServer {{env.PRIVATE_SERVER}}\",\n            \"\\t\\tgalaxySeed\": \"\\t\\tgalaxySeed {{env.GALAXY_SEED}}\",\n            \"\\t\\tenableCrashDumps\": \"\\t\\tenableCrashDumps {{env.ENABLE_CRASH_DUMPS}}\",\n            \"\\t\\tallowRelaying\": \"\\t\\tallowRelaying {{env.ALLOW_RELAYING}}\",\n            \"\\t\\tenableLogging\": \"\\t\\tenableLogging {{env.ENABLE_LOGGING}}\"\n        }\n    }\n}",
+        "startup": "{\n    \"done\": \"Lobby Id: \"\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/bash\n# steamcmd Base Installation Script\n#\nclear\nRED='\\\\033[0;31m'\nGREEN='\\\\033[0;32m'\nYELLOW='\\\\033[1;33m'\nBLUE='\\\\033[0;34m'\nNC='\\\\033[0m'\n\necho -e \"${BLUE}-------------------------------------------------${NC}\"\necho -e \"${YELLOW}Cubic Odyssey Installscript${NC}\"\necho -e \"${YELLOW}Egg by MrNissenDK ${NC}\"\necho -e \"${YELLOW}Install script from Enshrouded by gOOvER | https://goover.dev${NC}\"\necho -e \"${BLUE}-------------------------------------------------${NC}\"\n\n#apt -y update\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates jq dos2unix\n\necho -e \"${BLUE}-------------------------------------------------${NC}\"\necho -e \"${YELLOW}download and install steamcmd. please wait...${NC}\"\necho -e \"${BLUE}-------------------------------------------------${NC}\"\n\n## just in case someone removed the defaults.\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\n    echo -e \"steam user is not set.\\\\n\"\n    echo -e \"Using anonymous user.\\\\n\"\n    STEAM_USER=anonymous\n    STEAM_PASS=\"\"\n    STEAM_AUTH=\"\"\nelse\n    echo -e \"user set to ${STEAM_USER}\"\nfi\n\n## download and install steamcmd\ncd /tmp\nmkdir -p /mnt/server/steamcmd\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\ncd /mnt/server/steamcmd\n\n# SteamCMD fails otherwise for some reason, even running as root.\n# This is changed at the end of the install process anyways.\nchown -R root:root /mnt\nexport HOME=/mnt/server\necho -e \"${GREEN}..done..${NC}\"\n\n## install game using steamcmd\necho -e \"${BLUE}-------------------------------------------------${NC}\"\necho -e \"${YELLOW}install game using steamcmd. please wait...${NC}\"\necho -e \"${BLUE}-------------------------------------------------${NC}\"\n\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) $( [[ \"${STEAM_SDK}\" == \"1\" ]] && printf %s '+app_update 1007' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\necho -e \"${GREEN}..done..${NC}\"\n\n## set up 32 bit libraries\nmkdir -p /mnt/server/.steam/sdk32\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\n\n## set up 64 bit libraries\nmkdir -p /mnt/server/.steam/sdk64\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\n\n# add below your custom commands if needed\n\nFILE=$HOME/config/server_config.txt\nif [ -f \"$FILE\" ]; then\n  echo -e \"server_config.txt found.\"\nelse  \n  echo -e \"No server_config.txt found. Moving default...\"\n  cp -f $FILE.sample $FILE\n  echo -e \".done..\"\nfi\n\n## install end\necho -e \"${BLUE}-------------------------------------------------${NC}\"\necho -e \"${GREEN}Installation completed...${NC}\"\necho -e \"${BLUE}-------------------------------------------------${NC}\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Allow relaying",
+            "description": "Whethere it should send data to creators",
+            "env_variable": "ALLOW_RELAYING",
+            "default_value": "FALSE",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "in:TRUE,FALSE"
+            ],
+            "sort": 10
+        },
+        {
+            "name": "Enable crash dumps",
+            "description": "If server crash should it make a infomation file",
+            "env_variable": "ENABLE_CRASH_DUMPS",
+            "default_value": "FALSE",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "in:TRUE,FALSE"
+            ],
+            "sort": 9
+        },
+        {
+            "name": "Enable logging",
+            "description": "If it should log everything",
+            "env_variable": "ENABLE_LOGGING",
+            "default_value": "FALSE",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "in:TRUE,FALSE"
+            ],
+            "sort": 11
+        },
+        {
+            "name": "Ending Port",
+            "description": "The maximum port to try to bind to starting from the port value",
+            "env_variable": "ENDING_PORT",
+            "default_value": "27100",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "between:1024,65535",
+                "integer"
+            ],
+            "sort": 2
+        },
+        {
+            "name": "Galaxy seed",
+            "description": "Seed of the galaxy",
+            "env_variable": "GALAXY_SEED",
+            "default_value": "21945875634",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "numeric"
+            ],
+            "sort": 7
+        },
+        {
+            "name": "Game mode",
+            "description": "Sets the desired game mode, it's adventure by default",
+            "env_variable": "GAME_MODE",
+            "default_value": "ADVENTURE",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "in:CREATIVE,ADVENTURE"
+            ],
+            "sort": 6
+        },
+        {
+            "name": "Max players",
+            "description": "Will set the maximum number of allowed players",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "48",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "numeric"
+            ],
+            "sort": 5
+        },
+        {
+            "name": "Private server",
+            "description": "If you dont want it to be on the server list",
+            "env_variable": "PRIVATE_SERVER",
+            "default_value": "FALSE",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "in:TRUE,FALSE"
+            ],
+            "sort": 8
+        },
+        {
+            "name": "Server name",
+            "description": "The name of the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Cubic Odyssey Dedicated Server - Pelican",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "string"
+            ],
+            "sort": 3
+        },
+        {
+            "name": "Server password",
+            "description": "The code people need to use to join",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "string"
+            ],
+            "sort": 4
+        },
+        {
+            "name": "[STEAM] AppID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "3858450",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": [
+                "required",
+                "string",
+                "in:3858450"
+            ],
+            "sort": 12
+        },
+        {
+            "name": "Starting Port",
+            "description": "Set the port to bind the game to, sample",
+            "env_variable": "STARTING_PORT",
+            "default_value": "27001",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": [
+                "integer",
+                "between:1024,65535"
+            ],
+            "sort": 1
+        },
+        {
+            "name": "Windows",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": [
+                "boolean",
+                "in:1"
+            ],
+            "sort": 13
+        },
+        {
+            "name": "[WINE] WINEDEBUG",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": [
+                "required",
+                "max:20",
+                "string"
+            ],
+            "sort": 14
+        }
+    ],
+    "startup": "wine ./server/CubicOdysseyServer.exe"
+}

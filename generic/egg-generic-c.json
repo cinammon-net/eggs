@@ -1,0 +1,121 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY FOR CINAMMON.NET",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": "https://raw.githubusercontent.com/cinammon-net/eggs/main/generic/egg-generic-c.json"
+    },
+    "uuid": "cf9d13f6-f8e0-5a77-96dd-0173fcade225",
+    "exported_at": "2026-06-14T08:33:15+00:00",
+    "name": "Generic C#",
+    "author": "josdekurk@gmail.com",
+    "description": "A generic C# (dotnet) egg that runs your C# project.",
+    "features": [],
+    "docker_images": {
+        "Dotnet_10": "ghcr.io/pelican-eggs/yolks:dotnet_10",
+        "Dotnet_9": "ghcr.io/pelican-eggs/yolks:dotnet_9",
+        "Dotnet_8": "ghcr.io/pelican-eggs/yolks:dotnet_8",
+        "Dotnet_7": "ghcr.io/pelican-eggs/yolks:dotnet_7",
+        "Dotnet_6": "ghcr.io/pelican-eggs/yolks:dotnet_6",
+        "Dotnet_5": "ghcr.io/pelican-eggs/yolks:dotnet_5",
+        "Dotnet_3.1": "ghcr.io/pelican-eggs/yolks:dotnet_3.1",
+        "Dotnet_2.1": "ghcr.io/pelican-eggs/yolks:dotnet_2.1"
+    },
+    "file_denylist": [],
+    "startup": "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; cd {{PROJECT_DIR}}; dotnet restore; dotnet run --project {{PROJECT_FILE}}",
+    "config": {
+        "files": "{}",
+        "startup": "{\n    \"done\": [\n        \"change this text 1\",\n        \"change this text 2\"\n    ]\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/bash\n\napt update\napt install -y git curl jq file unzip\n\nmkdir -p /mnt/server\ncd /mnt/server\n\nif [ \"${USER_UPLOAD}\" == \"true\" ] || [ \"${USER_UPLOAD}\" == \"1\" ]; then\n    echo -e \"assuming user knows what they are doing have a good day.\"\n    exit 0\nfi\n\n## add git ending if it's not on the address\nif [[ ${GIT_ADDRESS} != *.git ]]; then\n    GIT_ADDRESS=${GIT_ADDRESS}.git\nfi\n\nif [ -z \"${USERNAME}\" ] && [ -z \"${ACCESS_TOKEN}\" ]; then\n    echo -e \"using anon api call\"\nelse\n    GIT_ADDRESS=\"https://${USERNAME}:${ACCESS_TOKEN}@$(echo -e ${GIT_ADDRESS} | cut -d/ -f3-)\"\nfi\n\n## pull git js bot repo\nif [ \"$(ls -A /mnt/server)\" ]; then\n    echo -e \"/mnt/server directory is not empty.\"\n    if [ -d .git ]; then\n        echo -e \".git directory exists\"\n        if [ -f .git/config ]; then\n            echo -e \"loading info from git config\"\n            ORIGIN=$(git config --get remote.origin.url)\n        else\n            echo -e \"files found with no git config\"\n            echo -e \"closing out without touching things to not break anything\"\n            exit 10\n        fi\n    fi\n\n    if [ \"${ORIGIN}\" == \"${GIT_ADDRESS}\" ]; then\n        echo \"pulling latest from github\"\n        git pull\n    fi\nelse\n    echo -e \"/mnt/server is empty.\\ncloning files into repo\"\n    if [ -z ${BRANCH} ]; then\n        echo -e \"cloning default branch\"\n        git clone ${GIT_ADDRESS} .\n    else\n        echo -e \"cloning ${BRANCH}'\"\n        git clone --single-branch --branch ${BRANCH} ${GIT_ADDRESS} .\n    fi\nfi\n\n## install end\necho \"-----------------------------------------\"\necho \"Installation completed...\"\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Git Repo Address",
+            "description": "GitHub Repo to clone I.E. https://github.com/parkervcp/repo_name",
+            "env_variable": "GIT_ADDRESS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Install Branch",
+            "description": "The branch to install.",
+            "env_variable": "BRANCH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "User Uploaded Files",
+            "description": "Skip all the install stuff if you are letting a user upload files. 0 = false (default) 1 = true",
+            "env_variable": "USER_UPLOAD",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Auto Update",
+            "description": "Pull the latest files on startup when using a GitHub repo.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Git Username",
+            "description": "Username to auth with git.",
+            "env_variable": "USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Git Access Token",
+            "description": "Password to use with git. It's best practice to use a Personal Access Token. https://github.com/settings/tokens https://gitlab.com/-/profile/personal_access_tokens",
+            "env_variable": "ACCESS_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "project file",
+            "description": "The main project file if multiple are present",
+            "env_variable": "PROJECT_FILE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Project location",
+            "description": "The location of where the .csproj file is located. not the .sln file!",
+            "env_variable": "PROJECT_DIR",
+            "default_value": "/home/container",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|",
+            "field_type": "text"
+        }
+    ],
+    "image": "data:image/png;base64,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"
+}

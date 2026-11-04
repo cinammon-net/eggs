@@ -1,0 +1,64 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY FOR CINAMMON.NET",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": "https://raw.githubusercontent.com/cinammon-net/eggs/main/games/egg-et-legacy.json"
+    },
+    "uuid": "6c8a5dda-094e-586f-bd19-6fe94acde6e6",
+    "exported_at": "2024-06-01T00:17:36+00:00",
+    "name": "ET Legacy",
+    "author": "parker@parkervcp.com",
+    "description": "Welcome to Enemy Territory: Legacy, an open source project that aims to create a fully compatible client and server for the popular online FPS game Wolfenstein: Enemy Territory - whose gameplay is still considered unmatched by many, despite its great age.",
+    "features": null,
+    "docker_images": {
+        "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+    },
+    "file_denylist": [],
+    "startup": "./etlded +set net_port {{SERVER_PORT}} +map {{MAP}} +set omnibot_enable {{OMNIBOT}}  $(if [ \"${OMNIBOT}\" == \"1\" ]; then echo '+set omnibot_path \"./legacy/omni-bot\"'; fi) + exec etl_server.cfg",
+    "config": {
+        "files": "{\r\n    \"etmain/etl_server.cfg\": {\r\n        \"parser\": \"file\",\r\n        \"find\": {\r\n            \"//set net_ip \\\"\\\"\": \"set net_ip \\\"0.0.0.0\\\"\",\r\n            \"//set net_port \\\"27960\\\"\": \"set net_port \\\"{{server.build.default.port}}\\\"\"\r\n        }\r\n    }\r\n}",
+        "logs": "{}",
+        "startup": "{\r\n    \"done\": \"Game Initialization completed in\"\r\n}",
+        "stop": "quit"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/bash\r\n\r\ncd /mnt/server\r\n\r\necho \"Downloading $ET_VERSION bit ET Legacy version\"\r\n\r\nif [ $ET_VERSION == \"32\" ];then \r\n    DOWNLOAD_URL=$(curl -s https://www.etlegacy.com/download | grep \"i386 archive\" | grep -Eoi '<a [^>]+>' |  grep -Eo 'href=\"[^\\\"]+\"' |  grep -Eo '(http|https)://[^\"]+')\r\n    EXTENTION=i386\r\nelse\r\n    DOWNLOAD_URL=$(curl -s https://www.etlegacy.com/download | grep \"x86_64 archive\" | grep -Eoi '<a [^>]+>' |  grep -Eo 'href=\"[^\\\"]+\"' |  grep -Eo '(http|https)://[^\"]+')\r\n    EXTENTION=x86_64\r\nfi\r\n\r\necho \"Download URL: ${DOWNLOAD_URL}\"\r\ncurl -sSL -o etlegacy.tar.gz ${DOWNLOAD_URL}\r\n\r\necho \"Unpacking ET: Legacy\"\r\ntar xvf etlegacy.tar.gz --strip-components=1 \r\nrm etlegacy.tar.gz\r\n\r\n\r\nE_DOWNLOAD_URL=$(curl -s https://www.splashdamage.com/games/wolfenstein-enemy-territory/ | grep .x86_full | grep -Eoi '<a [^>]+>' |  grep -Eo 'href=\"[^\\\"]+\"' |  grep -Eo --color=never '(http|https)://[^\"]+')\r\n\r\necho \"Downloading latest enemy territory files from: ${E_DOWNLOAD_URL}\"\r\ncurl -sSL -o enemy_territory.zip ${E_DOWNLOAD_URL}\r\n\r\necho \"Unpacking enemy territory files\"\r\nunzip -o enemy_territory.zip\r\nrm enemy_territory.zip\r\n\r\necho \"Copying enemy territory assets\"\r\n./*.x86_keygen_V03.run --tar xvf ./etmain/\r\n#cp etmain/pak*.pk3 /mnt/server/etmain/\r\n\r\n# Create .etlegacy as the server doesn't correctly create it\r\nmkdir -p /mnt/server/.etlegacy\r\n\r\nrm *.run\r\n\r\nmv etlded.${EXTENTION} etlded\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "ET Legacy Version",
+            "description": "What version of the server to install. 32 or 64 bit version.",
+            "env_variable": "ET_VERSION",
+            "default_value": "64",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|in:32,64",
+            "field_type": "text"
+        },
+        {
+            "name": "Default Map",
+            "description": "The default map to use when starting the server.",
+            "env_variable": "MAP",
+            "default_value": "oasis",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Enable Omnibot",
+            "description": "",
+            "env_variable": "OMNIBOT",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        }
+    ],
+    "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAIb0lEQVR42u2dTYhcWRXHf+feV93pTnX6o7q7OiqKEISZQRz8gtGVILpz41bwYxZuXCiCK0VRkZgEFNGVIIMiiqNxbBE/MsjsZjO4cFzpKAgmmcl02+nP6q567x4XdV9NpZNO7KSr36v3zh8KupO8TvLO/5x77vmfc688eeExxVBbOHsFRgCDEcBgBDAYAQxGAIMRwGAEMBgBDEYAQw2QFPmXS/wcrkVbbboGBBCgh9BD8CgSw5GLX7/x0cETeoggRpQxJUBu/Ddplzdrj3XxdHDs49jD0RUhpf8J8QmH4uKzDsUDPv5a/jNB0SGiWEQpKQEcSgfP+8Me38hu0EHIEDo41sRzm4RNcezg2caxJg1eJWFbPDs4tsWziWdTPHvIwOh5FPFDUcSjJJEEwexdrhwgN8iZaMImgSVNgYMj3TYDUoQNPP9wk1ynwTaedUlYJ2FNEjbEs4ejh7AViTKBcgY1EpSJAMNGdXet73IoWdTo0X2vXiFlJaR3/SwFugjdmF9clwYvyxS/cvO87KZoEmxJKBsBZLCGM2R2vW/UyP9EThQZCvuTKJPx+QXNeKfu89Gwxbf8Cr/3s0xZJCgXAY5LFg4lfg8iSUBokXE5u44DVv0cTYKRoKqFoOFtpAMSlDR+/bnsdZa1Rw+5g0xGgApD43+0h/A2unw6W6drBKg+ARTIkFhggkZcLj6oO0xrRnZoSbEcoEKG17hjcDH836DBvggJsIZnisDOoEJgBKhcuAe4ScLzboYX3Ax/kynCkL9n0q8uqkWA6hm/g/B9v8Sqm+OWNOLWMNxjB2FIqmR8AbbwfNWvsOrnaRJoxs2emjZQXQLkBk0RvuzP8zs/xzwZwer/9dgF5KH/mjT5o59lnn6Gb55eAwKEmO3flAbfS9pMWGJXLwLkWsCLMs2/ZJIJq/PXiwB5Nv93mYyJoPl/zQjQN/gaDdva1TkC7IuLDaZGA9MCDEYAgxHAYAQwGAEMRgAD1VcD84EQX8GNoA4mpIwAR2IPxyaeMMKXVaTSefZQP4MR4BA+EHaY0awy0z9CX+hKIgX+7GYGxS4jwD285DNhvZJrdA/hsm+PxPiVigChgq1tAnzTt3nGL9EiHYnMlVRpGKRKRN7FccW3edbPs0g6MoLbNrBknu/j54pf5hm/OPI5xsRee3k8X4Cd6Pm/8PO0Ruj5FgFK6PnuFD2/km3hOsYJ32l7fiUrgeOMy36ZH/tFFk7R+JUiwH9osC0eNyZxIB9kSRF+6eZ41i+cuvErQwABLvk2z7tzY3fwQwA60h9WDSYGPTwyEVIZPlpufDBdIGkrQwAf6+ZJybWAMHSkHSU4vq5iamBCFmcCyyjpCjpQ9dT6AU4WT4UdmlEN1JIleoH+6SQB4QXfZB9XmtJ1ZdTAp0uuBnZzVa9Exjc18JQGVwX4ul/hJ35xZKqeqYElNL4DtnFc8m2ujljVw7SActb2L/s2P/Wt0p5OamrgiFS9LTyX/DJX/TwLJd2ZWAQYoed/2y+X2vNNDRyRqpd7/nMl93xTA0eES9Hzx8H4lSLAP2WC2yT4ggpBAeE5N8tVP08rHlKFEeD0toDf8W2uFagGKnCAY4owNsa3JPCESTg9hreRVCoHSOJsoBtxbV+HVL1xn02oDAF2cfyXhN6Il4CcBE2ySswiVIYAHwpbtLXH5AiTQI1RJgP+5GfZxY39GloZNfATYQPY4DRm9S76Np0KGL9yaqCOuMIH8BV/np/5BVpklTiSMqnaRVGjUvW28Fz0y/zWz7E4JkUe2waeYG3/om/zc9+q3O2jpgY+QNXbjJ6/6ueOXd7NL7rO7zZWiwD18fz8hvQNEnZwcSlRiwBlVwNz4/c9v83qQ9T2BeUAxxOhw1O6yysyyUtumg0SZko2uGJq4BHoe/4CCw8h7DhgH8fjus8XslsA/EWm+IFf5kV3tlSdy5VTAx82zOYVvgzh126O3zyiqif0O4EzBEV5t3b4YfpvrvhlfuSXOFuSSFAZNfC7bplrfpZmVOPkHsa93/fDJ3OdhKqn9GcBfKwcpgge5YvZLW7S4A9+rtCRsMolgSpyRzFID+UFD/p+OPM/CVXPAW/hYDAV5GMS6YEvZa/RKskF1pXaBbgTev5RvTJDmCHjPaFzx60mLv7s86S8V/fYNwKM5lTNop4nengHx/vCDu/SzqCSeHg49O16QBbnBY0AFSNhCnws28QfEU36cnI5mkeMACeYiCb0J4E+nt3mI7o9WPPvhUVN4x2HYgQYdwGqn+kLr+P5cNjia9mNwRm/R91ytkjKRAl2AaYFPFKy11/TO3ja2uWT4TafzdYGwyD38+2mBhqqZFJsImgEeISi0STKgvZ4XPd5OlvjCd2/Yzt5PzQJTKDs4aJgZAR4JIN8PnuNT2XrpzYX4IBZzWiRci4G8uz/6EvIf29OU6YI7B6ZJRgBjoUL2gW6FNmNdJyE6hwZC5ryqjQKNYK1hJ3AmQTH6UZ648gYeIce8FemcbFcbAQoYUvYKA+PaGsvLh5a2L/etoEFnmcyP/B7sTpAHdEiJSl4osgIUOCV94uacqbgkrARoEDMktFQLTADMAIUeqLZObJYDrYcoJaY0kBScLu4EaBIAqDMFDxiZgQoaAlQ+lrCsqakBXYGGQEoVlBqaRo1BDUC1I0A0D9owpaAWhJA4k4gFNoVZAQoGEX3BiZFh8FAtS5+5hiCUACWtFdob2BSpPGTeKJXHcOQj37/Vu0W2huYFGn8W9LgJZm+a5SrTiPor8gESYERQJ688JgWnQkr1LokXNum0DK8gLrDdgFGAIMRwGAEMBgBDEYAgxHAUDsCqL2GOhNAtWevocYEUFsG6k0AEbEzAiwJNBgBDEYAgxHAYAQwGAEMRgCDEcBQA/wPy3Ht3d74CUUAAAAASUVORK5CYII="
+}

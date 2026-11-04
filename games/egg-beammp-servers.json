@@ -1,0 +1,124 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY FOR CINAMMON.NET",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": "https://raw.githubusercontent.com/cinammon-net/eggs/main/games/egg-beammp-servers.json"
+    },
+    "uuid": "edec78aa-5d87-5fd6-9c6d-57d7f4e4ee05",
+    "exported_at": "2024-08-03T06:04:16+02:00",
+    "name": "BeamMP Servers",
+    "author": "noah@noahserver.online",
+    "description": "This is the server for the multiplayer mod BeamMP for the game BeamNG.drive. The server is the point through which all clients communicate. You can write lua mods for the server, detailed instructions on the BeamMP Wiki.",
+    "features": null,
+    "docker_images": {
+        "Debian": "ghcr.io/parkervcp/yolks:debian"
+    },
+    "file_denylist": [],
+    "startup": "./BeamMP-Server",
+    "config": {
+        "files": "{\r\n    \"ServerConfig.toml\": {\r\n        \"parser\": \"file\",\r\n        \"find\": {\r\n            \"Name =\": \"Name = \\\"{{env.NAME}}\\\"\",\r\n            \"Port =\": \"Port = {{server.build.default.port}}\",\r\n            \"AuthKey =\": \"AuthKey = \\\"{{env.AUTHKEY}}\\\"\",\r\n            \"Private =\": \"Private = {{env.PRIVATE}}\",\r\n            \"MaxPlayers =\": \"MaxPlayers = {{server.build.env.MAX_PLAYERS}}\",\r\n            \"Description =\": \"Description = \\\"{{env.DESCRIPTION}}\\\"\",\r\n            \"MaxCars =\": \"MaxCars = {{env.MAX_CARS}}\",\r\n            \"Map =\": \"Map = \\\"{{env.MAP}}\\\"\",\r\n            \"LogChat =\": \"LogChat = {{env.LOGCHAT}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"[INFO] Vehicle data network online\"\r\n}",
+        "logs": "{}",
+        "stop": "exit"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/bash\r\n#Create the server directory\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\n#Remove any old versions\r\nrm -f BeamMP-Server\r\n\r\n#Check for latest release & download URLs\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/BeamMP/BeamMP-Server/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/BeamMP/BeamMP-Server/releases\")\r\nMATCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"Server.debian.12.x86_64\" || echo \"Server.debian.12.arm64\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    echo -e \"Using latest BeamMP server version\"\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i \"${MATCH}\" | head -1)\r\nelse\r\n    echo -e \"Chosen version :${VERSION}. Verifying version from releases\"\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i \"${MATCH}\" | head -1)\r\n    else\r\n        echo -e \"No valid versions found. Defaulting to the latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i \"Server\" | grep -i \"debian\" | grep -i \"12\" |  grep -i \"x\" | grep -i \"64\" | head -1)\r\n    fi\r\nfi\r\n\r\n#Download the BeamMP server binary\r\necho -e \"Running curl -sSL ${DOWNLOAD_URL} -o BeamMP-Server\"\r\ncurl -sSL ${DOWNLOAD_URL} -o BeamMP-Server\r\nchmod +x BeamMP-Server\r\n\r\n#Create a default configuration file\r\ncat > ServerConfig.toml << EOF\r\n# This is the BeamMP-Server config file.\r\n# Help & Documentation: https://wiki.beammp.com/en/home/server-maintenance\r\n# IMPORTANT: Fill in the AuthKey with the key you got from https://keymaster.beammp.com/ on the left under 'Keys'\r\n\r\n[General]\r\nName = 'BeamMP Server'\r\nPort = 30814\r\n# AuthKey has to be filled out in order to run the server\r\nAuthKey = ''\r\n# Whether to log chat messages in the console / log\r\nLogChat = true\r\n# Add custom identifying tags to your server to make it easier to find. Format should be TagA,TagB,TagC. Note the comma seperation.\r\nTags = 'Freeroam'\r\nDebug = false\r\nPrivate = true\r\nMaxCars = 1\r\nMaxPlayers = 8\r\nMap = '/levels/gridmap_v2/info.json'\r\nDescription = 'BeamMP Default Description'\r\nResourceFolder = 'Resources'\r\n\r\n[Misc]\r\n# Hides the periodic update message which notifies you of a new server version. You should really keep this on and always update as soon as possible. For more information visit https://wiki.beammp.com/en/home/server-maintenance#updating-the-server. An update message will always appear at startup regardless.\r\nImScaredOfUpdates = false\r\n# You can turn on/off the SendErrors message you get on startup here\r\nSendErrorsShowMessage = true\r\n# If SendErrors is 'true', the server will send helpful info about crashes and other issues back to the BeamMP developers. This info may include your config, who is on your server at the time of the error, and similar general information. This kind of data is vital in helping us diagnose and fix issues faster. This has no impact on server performance. You can opt-out of this system by setting this to 'false'\r\nSendErrors = true\r\n\r\nEOF\r\n\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Server Name",
+            "description": "The name of your server. This is what appears on the server list.",
+            "env_variable": "NAME",
+            "default_value": "BeamMP Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Description",
+            "description": "Sets the server description",
+            "env_variable": "DESCRIPTION",
+            "default_value": "BeamMP Default Description",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+        },
+        {
+            "name": "BeamMP Server Version",
+            "description": "The BeamMP server version to be installed. Latest or invalid versions will default to latest. See all available versions at https://github.com/BeamMP/BeamMP-Server/releases\r\n\r\nexample: v3.1.0 or  v2.2.0 or latest",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:12",
+            "field_type": "text"
+        },
+        {
+            "name": "Authentication Key",
+            "description": "The authentication key for your server. A key can be obtained from the BeamMP keymaster at https://keymaster.beammp.com",
+            "env_variable": "AUTHKEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Players",
+            "description": "The maximum number of players allowed on the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "6",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|max:100",
+            "field_type": "text"
+        },
+        {
+            "name": "Private",
+            "description": "Should the server be private?",
+            "env_variable": "PRIVATE",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Cars",
+            "description": "The maximum number of cars allowed to be spawned per player.",
+            "env_variable": "MAX_CARS",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|max:10",
+            "field_type": "text"
+        },
+        {
+            "name": "Map",
+            "description": "The map for your server. Stock maps are listed below.\r\n\r\n/levels/gridmap_v2/info.json\r\n/levels/automation_test_track/info.json\r\n/levels/east_coast_usa/info.json\r\n/levels/hirochi_raceway/info.json\r\n/levels/italy/info.json\r\n/levels/jungle_rock_island/info.json\r\n/levels/industrial/info.json\r\n/levels/small_island/info.json\r\n/levels/smallgrid/info.json\r\n/levels/utah/info.json\r\n/levels/west_coast_usa/info.json\r\n/levels/driver_training/info.json\r\n/levels/derby/info.json",
+            "env_variable": "MAP",
+            "default_value": "/levels/gridmap_v2/info.json",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Chat logging",
+            "description": "Enable chat logging by the server",
+            "env_variable": "LOGCHAT",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        }
+    ],
+    "image": "data:image/png;base64,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"
+}

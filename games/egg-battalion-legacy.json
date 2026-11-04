@@ -1,0 +1,86 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY FOR CINAMMON.NET",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": "https://raw.githubusercontent.com/cinammon-net/eggs/main/games/egg-battalion-legacy.json"
+    },
+    "uuid": "a7bfc6bc-443d-5341-b00c-0dde61f850ba",
+    "exported_at": "2024-06-01T00:03:44+00:00",
+    "name": "BATTALION: Legacy",
+    "author": "diedyesterdaywashere@gmail.com",
+    "description": "BATTALION: Legacy recaptures the core of classic shooters in the final iteration of Battalion 1944. Return to the simple days of playing first person shooters with your friends. Grab your bolt action rifle in 'rifles only' mode or compete in 5v5 Search and Destroy.",
+    "features": [
+        "steam_disk_space"
+    ],
+    "docker_images": {
+        "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+    },
+    "file_denylist": [],
+    "startup": "./Battalion/Binaries/Linux/BattalionServer-Linux-Shipping Battalion -QueryPort={{QUERY_PORT}} -SteamServerName=\"{{SERVER_NAME}]\" -Queue=\"Wartide\" -AdminPassword=\"{{ADMIN_PW}}\" -Log",
+    "config": {
+        "files": "{}",
+        "logs": "{}",
+        "startup": "{\r\n    \"done\": \" OnCreateSessionComplete \"\r\n}",
+        "stop": "^^C"
+    },
+    "scripts": {
+        "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+        }
+    },
+    "variables": [
+        {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "805140",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:805140",
+            "field_type": "text"
+        },
+        {
+            "name": "Auto Update",
+            "description": "Server will check for updates on every restart. Use 0 to disable.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Query Port",
+            "description": "",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27016",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65536",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "BATTALION Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:60",
+            "field_type": "text"
+        },
+        {
+            "name": "Admin Password",
+            "description": "",
+            "env_variable": "ADMIN_PW",
+            "default_value": "changeme",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        }
+    ],
+    "image": "data:image/png;base64,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"
+}

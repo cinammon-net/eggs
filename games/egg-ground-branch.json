@@ -1,0 +1,124 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY FOR CINAMMON.NET",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": "https://raw.githubusercontent.com/cinammon-net/eggs/main/games/egg-ground-branch.json"
+    },
+    "uuid": "b291a7dc-0f24-5ad9-8fb1-3fb178bd77ea",
+    "exported_at": "2025-07-27T12:53:37+00:00",
+    "name": "Ground Branch",
+    "author": "red_thirten@yahoo.com",
+    "description": "From one of the developers behind the original Rainbow Six® and Ghost Recon® games, comes a thinking-man's first-person shooter featuring in-depth character and weapon customization. Take your time. Think ahead. Get the job done.",
+    "features": [],
+    "docker_images": {
+        "Wine [Staging]": "ghcr.io/parkervcp/yolks:wine_staging"
+    },
+    "file_denylist": [],
+    "startup": "wine ./GroundBranch/Binaries/Win64/GroundBranchServer-Win64-Shipping.exe MultiHome=0.0.0.0 Port={{SERVER_PORT}} QueryPort={{QUERY_PORT}} -log & GB_PID=$!; tail -c0 -F ./GroundBranch/Saved/Logs/GroundBranch.log --pid=$GB_PID",
+    "config": {
+        "files": "{\n    \"GroundBranch/ServerConfig/Server.ini\": {\n        \"parser\": \"file\",\n        \"find\": {\n            \"ServerName=\": \"ServerName={{env.SERVER_NAME}}\",\n            \"MaxPlayers=\": \"MaxPlayers={{env.MAX_PLAYERS}}\"\n        }\n    },\n    \"GroundBranch/Config/DefaultModding.ini\": {\n        \"parser\": \"file\",\n        \"find\": {\n            \"ModPath=\": \"ModPath=../steamapps/workshop/content/16900/\"\n        }\n    }\n}",
+        "startup": "{\r\n    \"done\": \"Bringing up level for play took\"\r\n}",
+        "logs": "{}",
+        "stop": "^^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/bash\r\n\r\n## File: Pterodactyl Ground Branch Egg - egg-pterodactyl-ground-branch.json\r\n## Authors: David Wolfe (Red-Thirten)\r\n## Date: 2023/08/01\r\n## License: MIT License\r\n## Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n# Download and install SteamCMD\r\nexport HOME=/mnt/server\r\ncd /tmp\r\nmkdir -p $HOME/steamcmd $HOME/steamapps\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C $HOME/steamcmd\r\ncd $HOME/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\n\r\n# Install game server using SteamCMD\r\n./steamcmd.sh +force_install_dir $HOME +login anonymous $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) validate +quit\r\n\r\n# Set up 32 and 64 bit libraries\r\nmkdir -p $HOME/.steam/sdk{32,64}\r\ncp -v linux32/steamclient.so $HOME/.steam/sdk32/steamclient.so\r\ncp -v linux64/steamclient.so $HOME/.steam/sdk64/steamclient.so\r\n\r\n## Ground Branch setup\r\n# Make ServerConfig directory and default Server.ini file (since they are not initially present before first server start)\r\nmkdir -p $HOME/GroundBranch/ServerConfig/ && cd \"$_\"\r\n\r\nif [[ ! -f Server.ini ]]; then\r\n    echo -e '\\nCreating default \"Server.ini\" configuration file...'\r\n    cat > Server.ini << EOF\r\n[/Script/RBZooKeeper.ZKServer]\r\n; Name of the server 64 characters max)\r\nServerName=Unnamed Ground Branch Server\r\n\r\n; The message of the day (512 characters max)\r\n; e.g. ServerMOTD=This text here is displayed<br>with the 'admin motd' command.\r\nServerMOTD=\"Welcome!\"\r\n\r\n; Set to a jpg image to act as a server banner in-game where possible.\r\n; (recommended resolution: 788 x 386)\r\nServerWebBanner=\"\"\r\n; e.g. ServerWebPage=www.images.com/myimage.jpeg\r\n\r\n; Password required to join the server.\r\n;ServerPassword=\r\n\r\n; Password required to join the server as a permanent spectator.\r\n;SpectatorOnlyPassword=\r\n\r\n; Maximum number of players allowed on this server.\r\nMaxPlayers=16\r\nMaxSpectators=0\r\n\r\n; Set default match types for game modes and round limits:\r\n; Match types: Continuous, BestOf, FirstTo, Play, PlayUntilWin, TimeLimit.\r\n; Round limits = number of rounds, except Time Limit match type (minutes).\r\n; PVE / Co-op:\r\nPVEMatchType=Continuous\r\nPVERoundLimit=2\r\n; PVP:\r\nPVPMatchType=Continuous\r\nPVPRoundLimit=3\r\n; PVP FFA (Free-for-all):\r\nPVPFFAMatchType=Continuous\r\nPVPFFARoundLimit=1\r\nGameRules=((\"AllowCheats\", False),(\"AllowDeadChat\", True),(\"AllowUnrestrictedRadio\", False),(\"AllowUnrestrictedVoice\", False),(\"SpectateEnemies\", True),(\"SpectateForceFirstPerson\", False),(\"SpectateFreeCam\", True),(\"UseTeamRestrictions\", False))\r\nEOF\r\nfi\r\n\r\necho -e \"\\nGround Branch Dedicated Server successfully installed!\\n\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "/bin/bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Automatic Updates",
+            "description": "Quickly checks for any server updates on startup, and updates if necessary. (1 ON | 0 OFF)",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Players",
+            "description": "Maximum number of players allowed to connect to the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "16",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Name",
+            "description": "The name of the server that will appear in the server list.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Unnamed Ground Branch Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:255",
+            "field_type": "text"
+        },
+        {
+            "name": "[REQUIRED] Server Query Port",
+            "description": "This is the port that your clients will type in and use to connect to the lobby (not the game world). Ensure this port matches your externally forwarded port, and is distanced from other running Ground Branch servers in cinammon.net (increments of 100 are recommended). This is also true for the Primary/Game Port!",
+            "env_variable": "QUERY_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65536",
+            "field_type": "text"
+        },
+        {
+            "name": "[Repair] Validate Server Files",
+            "description": "Leave empty (no value) for OFF or type \"true\" or \"1\" for ON. Validates all server files when Automatic Updates is enabled. Note: This will significantly increase server startup times, so it is recommended to only enable this when needed.",
+            "env_variable": "VALIDATE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+        },
+        {
+            "name": "[System] Ground Branch Dedicated Server App ID",
+            "description": "Steam App ID used for installation and updates. Cannot be changed.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "476400",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:476400",
+            "field_type": "text"
+        },
+        {
+            "name": "[System] Use Windows Branch",
+            "description": "Tells the installer/updater to only download the Windows branch of the server (the only branch currently available) so that it can run on Wine. Cannot be changed.",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1",
+            "field_type": "text"
+        },
+        {
+            "name": "[System] WINEARCH",
+            "description": "Used for compatibility. Cannot be changed.",
+            "env_variable": "WINEARCH",
+            "default_value": "win64",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:win64",
+            "field_type": "text"
+        },
+        {
+            "name": "[System] WINEDEBUG",
+            "description": "Used to suppress WINE FIXME messages. Rarely needs to be changed.",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|nullable",
+            "field_type": "text"
+        }
+    ],
+    "image": "data:image/png;base64,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"
+}

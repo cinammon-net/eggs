@@ -1,0 +1,156 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY FOR CINAMMON.NET",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": "https://raw.githubusercontent.com/cinammon-net/eggs/main/games/egg-midnight-ghost-hunt.json"
+    },
+    "uuid": "cf96f53c-3292-5c3e-a397-25918e0dd206",
+    "exported_at": "2024-07-28T19:43:17+02:00",
+    "name": "Midnight Ghost Hunt",
+    "author": "josdekurk@gmail.com",
+    "description": "The chaotic multiplayer hide-and-seek game. Possess seemingly harmless objects as Ghosts or chase them down as Hunters before the clock strikes midnight! ",
+    "features": [
+        "steam_disk_space"
+    ],
+    "docker_images": {
+        "Proton": "ghcr.io/parkervcp/steamcmd:proton"
+    },
+    "file_denylist": [],
+    "startup": "proton run MidnightGhostHunt/Binaries/Win64/MidnightGhostHuntServer-Win64-Shipping.exe -server -log -port={{SERVER_PORT}} -queryport={{QUERY_PORT}} -BeaconPort={{BEACON_PORT}} -multihome=0.0.0.0 -Map={{MAP}} -Gamename=\"{{GAME_NAME}}\" -Gamemode=\"{{GAME_MODE}}\" -Region=\"{{REGION}}\" -BotDifficulty=\"{{B_DIFFICULTY}}\" -password=\"{{PASSWORD}}\" {{ADDITIONAL_ARGS}}  & GH_PID=$!; sleep 1; tail -c0 -F  /home/container/MidnightGhostHunt/Saved/Logs/MidnightGhostHunt.log --pid=$GH_PID",
+    "config": {
+        "files": "{}",
+        "startup": "{\r\n    \"done\": \"IpNetDriver listening on port\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n./steamcmd.sh +force_install_dir /mnt/server/MidnightGhostHunt/Binaries/Win64/ +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update 1007 +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1118810",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1118810",
+            "field_type": "text"
+        },
+        {
+            "name": "Windows Install",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Auto Update",
+            "description": "Auto Update a server on start",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Query Port",
+            "description": "",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Game Name",
+            "description": "Changes the game name.",
+            "env_variable": "GAME_NAME",
+            "default_value": "Dedicated_Server_01",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|min:3",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Password",
+            "description": "Sets your server password.",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|alpha_dash|max:128",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Map",
+            "description": "The map of the server.\n\nOptions:\n(Mansion, Asylum, Theatre, Museum, Ghost Ship, Carnival, School, Graveyard, Doll Factory, Mall)",
+            "env_variable": "MAP",
+            "default_value": "Asylum",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Gamemode",
+            "description": "The server gamemode.\n\nOptions:\n(4v4 Hunt, 6v6 Hunt, Darkness)",
+            "env_variable": "GAME_MODE",
+            "default_value": "4v4 Hunt",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Region",
+            "description": "The region of dedicated server.\n\nOptions:\n(North America, South America, Western Europe, Northern Europe, Eastern Europe, Middle East, Asia, Africa, Oceania)",
+            "env_variable": "REGION",
+            "default_value": "Eastern Europe",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Bot Difficlty",
+            "description": "The difficulty setting for bots, Auto takes the average player level in the server to determine difficulty.\n\nOptions:\n(Easy, Normal, Hard, Auto)",
+            "env_variable": "B_DIFFICULTY",
+            "default_value": "Auto",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Addittional Args",
+            "description": "Extra arguments like: -NoBots -NoAutobalance",
+            "env_variable": "ADDITIONAL_ARGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Beacon Port",
+            "description": "",
+            "env_variable": "BEACON_PORT",
+            "default_value": "7787",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+        }
+    ],
+    "image": "data:image/png;base64,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"
+}

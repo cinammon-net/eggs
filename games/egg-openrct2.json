@@ -1,0 +1,224 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY FOR CINAMMON.NET",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": "https://raw.githubusercontent.com/cinammon-net/eggs/main/games/egg-openrct2.json"
+    },
+    "uuid": "0f11a9f8-c33f-537d-aecc-8180722918cf",
+    "exported_at": "2025-12-13T17:10:38-08:00",
+    "name": "OpenRCT2",
+    "author": "red_thirten@yahoo.com",
+    "description": "OpenRCT2 is an open-source re-implementation of RollerCoaster Tycoon 2 (RCT2), expanding the game with new features, fixing bugs and raising game limits.",
+    "features": null,
+    "docker_images": {
+        "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+    },
+    "file_denylist": [],
+    "startup": "./OpenRCT2/openrct2-cli --version && ./OpenRCT2/openrct2-cli host $(if {{LOAD_AUTOSAVE}} && [ -d ServerData/save/autosave/ ]; then find ServerData/save/autosave/ | sort -r | head -1; else echo \"{{SAVE_URI}}\"; fi) --port {{SERVER_PORT}} --user-data-path /home/container/ServerData/",
+    "config": {
+        "files": "{\r\n    \"ServerData/config.ini\": {\r\n        \"parser\": \"ini\",\r\n        \"find\": {\r\n            \"general.autosave\": \"{{server.build.env.AUTOSAVE_INTERVAL}}\",\r\n            \"general.autosave_amount\": \"{{server.build.env.AUTOSAVE_AMOUNT}}\",\r\n            \"network.player_name\": \"\\\"{{server.build.env.SERVER_PLAYER_NAME}}\\\"\",\r\n            \"network.default_port\": \"{{server.build.default.port}}\",\r\n            \"network.default_password\": \"\\\"{{server.build.env.SERVER_PASSWORD}}\\\"\",\r\n            \"network.advertise\": \"{{server.build.env.SERVER_ADVERTISE}}\",\r\n            \"network.maxplayers\": \"{{server.build.env.MAX_PLAYERS}}\",\r\n            \"network.server_name\": \"\\\"{{server.build.env.SERVER_NAME}}\\\"\",\r\n            \"network.server_description\": \"\\\"{{server.build.env.SERVER_DESCRIPTION}}\\\"\",\r\n            \"network.server_greeting\": \"\\\"{{server.build.env.SERVER_GREETING}}\\\"\",\r\n            \"network.provider_name\": \"\\\"{{server.build.env.PROVIDER_NAME}}\\\"\",\r\n            \"network.provider_email\": \"\\\"{{server.build.env.PROVIDER_EMAIL}}\\\"\",\r\n            \"network.provider_website\": \"\\\"{{server.build.env.PROVIDER_WEBSITE}}\\\"\",\r\n            \"network.log_chat\": \"{{server.build.env.LOG_CHAT}}\",\r\n            \"network.log_server_actions\": \"{{server.build.env.LOG_SERVER_ACTIONS}}\",\r\n            \"network.pause_server_if_no_clients\": \"{{server.build.env.PAUSE_NO_CLIENTS}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"Listening for clients on\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/bash\r\n\r\n## File: Pterodactyl OpenRCT2 Egg - egg-pterodactyl-open-r-c-t2.json\r\n## Authors: David Wolfe (Red-Thirten), parkervcp\r\n## Date: 2025/12/13\r\n## License: MIT License\r\n\r\nexport HOME=/mnt/server\r\n\r\nGITHUB_PACKAGE=\"OpenRCT2/OpenRCT2\"\r\nMATCH=\"Linux-bookworm-x86_64.tar.gz\"\r\nDEFAULT_SAVE=\"https://raw.githubusercontent.com/pelican-eggs/games-standalone/master/openrct2/save.park\"\r\n\r\n## OpenRCT2 Install\r\n[ ! -d $HOME ] && mkdir $HOME\r\ncd $HOME\r\n# Remove existing installation if present\r\n[ -d OpenRCT2 ] && rm -rf OpenRCT2\r\n# Setup temp directory for downloading/building and move to it\r\n[ -d temp ] && rm -rf temp\r\nmkdir temp && cd temp\r\n\r\n# Determine if installing from source or from release\r\nif [ \"${VERSION}\" == \"develop\" ]; then\r\n    # Get required packages\r\n    apt -y update\r\n    apt -y install --no-install-recommends \\\r\n        git \\\r\n        make \\\r\n        cmake \\\r\n        gcc \\\r\n        build-essential \\\r\n        libicu-dev \\\r\n        pkg-config \\\r\n        libcurl4-openssl-dev \\\r\n        libcrypto++-dev \\\r\n        libpng-dev \\\r\n        libssl-dev \\\r\n        libzip-dev \\\r\n        duktape-dev \\\r\n        nlohmann-json3-dev \\\r\n        libzstd-dev \\\r\n        libsdl2-dev \\\r\n        libspeexdsp-dev \\\r\n        libflac-dev \\\r\n        libvorbis-dev\r\n    echo -e \"\\nInstalling/Updating OpenRCT2 from source...\\n\"\r\n    \r\n    # Clone the branch and check if successful\r\n    git clone --branch \"${VERSION}\" https://github.com/${GITHUB_PACKAGE}\r\n    if [ ! -d OpenRCT2 ]; then\r\n        echo -e \"\\nFailed to clone \\\"${VERSION}\\\" branch from https://github.com/${GITHUB_PACKAGE}\\n\"\r\n        exit 1\r\n    fi\r\n    \r\n    cd OpenRCT2\r\n    mkdir build && cd build\r\n    # Prepare CMake files for a lightweight and CLI-only build of OpenRCT2, using the appropriate flags\r\n    # (The `-DDISABLE_GUI=ON` flag is currently broken & has been temp. removed. This requires 4 addl. UI packages to be installed.)\r\n    cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DPORTABLE=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_CXX_FLAGS=\"-g -gz\" -DDISABLE_TTF=ON -DDISABLE_GOOGLE_BENCHMARK=ON -DDISABLE_DISCORD_RPC=ON\r\n    echo -e \"\\nBuilding OpenRCT2 package from source...\\n\\tThis process can take quite some time. Grab a coffee :)\\n\"\r\n    # Build OpenRCT2\r\n    DESTDIR=. make install\r\n    # Check if build was successful\r\n    if [ ! -f usr/local/bin/openrct2-cli ]; then\r\n        echo -e \"\\nFailed to successfully build OpenRCT2!\\n\"\r\n        exit 1\r\n    fi\r\n    \r\n    # Make executable-ready package by moving compiled files to the correct locations\r\n    mkdir -p $HOME/OpenRCT2/{data,lib}\r\n    cd usr/local\r\n    mv bin/openrct2-cli $HOME/OpenRCT2/\r\n    mv bin/*.so $HOME/OpenRCT2/lib\r\n    mv share/openrct2/* $HOME/OpenRCT2/data/\r\n    # mv share/openrct2-cli/* $HOME/OpenRCT2/data/\r\n    mv share/doc $HOME/OpenRCT2/\r\n    echo -e \"\\nBuild of OpenRCT2 package complete!\"\r\nelse\r\n    echo -e \"\\nInstalling/Updating OpenRCT2 from release tag \\\"${VERSION}\\\"...\\n\"\r\n    \r\n    # This is a simple script to use the GitHub API for release versions.\r\n    # This requires the egg has a variable for GITHUB_PACKAGE, VERSION and MATCH (MATCH is to match the filename in some way).\r\n    # Get release info and download links\r\n    LATEST_JSON=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases/latest\")\r\n    RELEASES=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases\")\r\n    if [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\n    else\r\n        VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n        if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n            DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n        else\r\n            DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n        fi\r\n    fi\r\n    # Download the release and check if successful\r\n    curl -L ${DOWNLOAD_URL} -o OpenRCT2.tar.gz\r\n    if [ ! -f OpenRCT2.tar.gz ]; then\r\n        echo -e \"\\nFailed to download release: ${DOWNLOAD_URL}\\n\"\r\n        exit 1\r\n    fi\r\n    \r\n    # Extract archive\r\n    tar -xvf OpenRCT2.tar.gz -C $HOME\r\n\r\n    echo -e \"\\nDownload/Update of OpenRCT2 release successful!\"\r\nfi\r\n\r\ncd $HOME\r\nrm -rf temp # Clean up temp building directory\r\n\r\n## OpenRCT2 Setup\r\n# Setup ServerData/save directory\r\n[ ! -d ServerData/save ] && mkdir -p ServerData/save\r\ncd ServerData/save\r\n# Download default save.park if missing\r\nif [ ! -f save.park ]; then\r\n    echo -e \"Downloading default save.park file from ${DEFAULT_SAVE}\"\r\n    curl -sSLO ${DEFAULT_SAVE}\r\nfi\r\n\r\necho -e \"\\nOpenRCT2 Successfully Installed!\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "/bin/bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Save File",
+            "description": "Save file (.sv4 / .sv6 / .park) to load. Can be a file path or can be a webhosted file URL. An existing save file must be specified; the server cannot generate a new scenario/save from scratch.",
+            "env_variable": "SAVE_URI",
+            "default_value": "ServerData/save/save.park",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|min:4",
+            "field_type": "text"
+        },
+        {
+            "name": "Load Latest Autosave",
+            "description": "Will load the latest autosave (assuming one is present) *instead* of the Save File when the server is started. Useful for loading the latest progress of a park after a reboot. Set to \"false\" to \"lock\" progress of the park, and always load the original Save File on start up.",
+            "env_variable": "LOAD_AUTOSAVE",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Autosave Interval",
+            "description": "0 = Every 1 min, 1 = Every 5 min, 2 = Every 15 min, 3 = Every 30 min, 4 = Every hour, 5 = Never",
+            "env_variable": "AUTOSAVE_INTERVAL",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|in:0,1,2,3,4,5",
+            "field_type": "text"
+        },
+        {
+            "name": "Autosaves To Keep",
+            "description": "Number of autosaves to keep before rolling over and deleting the oldest one. Set to 0 to disable autosaving.",
+            "env_variable": "AUTOSAVE_AMOUNT",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Players",
+            "description": "Maximum players allowed to connect to the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "16",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Password",
+            "description": "Password requested by the server for clients to connect. Admins do not have to enter password to join. Leave empty for no password.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+        },
+        {
+            "name": "Advertise Server",
+            "description": "If set to \"false\", the server will not be advertised in the master server list, and clients must manually connect.",
+            "env_variable": "SERVER_ADVERTISE",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Pause Server If No Clients",
+            "description": "Set to \"true\" to have the server pause simulation if no clients are on the server.",
+            "env_variable": "PAUSE_NO_CLIENTS",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Name",
+            "description": "Name of the server that appears in the server list.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Description",
+            "description": "Description of the server that appears when hovering over the server in the server list.",
+            "env_variable": "SERVER_DESCRIPTION",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Player Name",
+            "description": "The server appears as a player in the player list. This is the name it will have.",
+            "env_variable": "SERVER_PLAYER_NAME",
+            "default_value": "Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Greeting",
+            "description": "The \"Message of the Day\" that gets sent to all clients who join.",
+            "env_variable": "SERVER_GREETING",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+        },
+        {
+            "name": "Provider Name",
+            "description": "Server provider name that appears in server information window.",
+            "env_variable": "PROVIDER_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Provider E-Mail",
+            "description": "Server provider e-mail that appears in server information window.",
+            "env_variable": "PROVIDER_EMAIL",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Provider Website",
+            "description": "Server provider website that appears in server information window.",
+            "env_variable": "PROVIDER_WEBSITE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+        },
+        {
+            "name": "Log Chat",
+            "description": "Set to \"true\" if you would like in-game chat logged to file in `~/ServerData/chatlogs`.",
+            "env_variable": "LOG_CHAT",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Log Server Actions",
+            "description": "Set to \"true\" if you would like in-game actions logged to file in `~/ServerData/serverlogs`.",
+            "env_variable": "LOG_SERVER_ACTIONS",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "OpenRCT2 Version",
+            "description": "The release tag (version) of OpenRCT2 to download and install from their official Github (ie. \"v0.4.15\"). Use \"latest\" to download the latest release, or \"develop\" to build from the latest source (takes longer to install but is the most up to date).",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "[System] Library Path",
+            "description": "What path to load libraries from for release binaries. Rarely needs to be changed.",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": "./OpenRCT2/lib",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+        }
+    ],
+    "image": "data:image/png;base64,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"
+}
