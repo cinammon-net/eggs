@@ -10,7 +10,7 @@
     "description": "Creates a container that runs java.",
     "features": null,
     "docker_images": {
-        "Java 25": "cinammon-paper:java25",
+        "Java 25": "ghcr.io/parkervcp/yolks:java_25",
         "ghcr.io/parkervcp/yolks:java_8": "ghcr.io/parkervcp/yolks:java_8",
         "ghcr.io/parkervcp/yolks:java_11": "ghcr.io/parkervcp/yolks:java_11",
         "ghcr.io/parkervcp/yolks:java_16": "ghcr.io/parkervcp/yolks:java_16",

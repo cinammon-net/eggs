@@ -20,7 +20,7 @@
     ],
     "docker_images": {
         "Java 21": "ghcr.io/parkervcp/yolks:java_21",
-        "Java 25": "cinammon-paper:java25",
+        "Java 25": "ghcr.io/parkervcp/yolks:java_25",
         "Java 17": "ghcr.io/parkervcp/yolks:java_17",
         "Java 8": "ghcr.io/parkervcp/yolks:java_8"
     },
