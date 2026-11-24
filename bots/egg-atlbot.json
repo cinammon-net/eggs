@@ -4,28 +4,28 @@
         "version": "PTDL_v2",
         "update_url": "https://raw.githubusercontent.com/cinammon-net/eggs/main/bots/egg-atlbot.json"
     },
-    "uuid": "17ab58cf-3af2-57cf-b499-6f46de8b9d79",
     "exported_at": "2024-06-01T19:44:10+00:00",
     "name": "ATLBot",
     "author": "jfeldt19@gmail.com",
     "description": "ATLbot in ptero\r\n\r\nhttps://github.com/ATLauncher/discord-bot/",
-    "features": null,
+    "features": [],
     "docker_images": {
-        "Nodejs 16": "ghcr.io/parkervcp/yolks:node_16"
+        "Nodejs 18": "ghcr.io/parkervcp/yolks:nodejs_18",
+        "Nodejs 20": "ghcr.io/parkervcp/yolks:nodejs_20"
     },
     "file_denylist": [],
     "startup": "npm run start",
     "config": {
         "files": "{\r\n    \"config/local.json\": {\r\n        \"parser\": \"json\",\r\n        \"find\": {\r\n            \"discord.client_token\": \"{{server.build.env.CLIENT_TOKEN}}\",\r\n            \"logging.level\": \"debug\"\r\n        }\r\n    }\r\n}",
-        "logs": "{}",
         "startup": "{\r\n    \"done\": \"Bot started\"\r\n}",
+        "logs": "{}",
         "stop": "^C"
     },
     "scripts": {
         "installation": {
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt -y install git openssl\r\n\r\ncd /mnt/server\r\nif [[ -d .git/ ]]; then\r\n    git pull\r\nelse\r\n    git clone https://github.com/ATLauncher/discord-bot.git .  \r\nfi\r\n\r\necho '{}' > config/local.json\r\n\r\nnpm install --production\r\n\r\nnpm run build\r\n\r\nrm Dockerfile\r\nrm CONTRIBUTING.md\r\nrm README.md\r\nrm /config/.gitignore\r\nrm CODE_OF_CONDUCT.md\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
             "container": "node:16-bookworm",
-            "entrypoint": "bash",
-            "script": "#!/bin/bash\r\n\r\napt update\r\napt -y install git openssl\r\n\r\ncd /mnt/server\r\nif [[ -d .git/ ]]; then\r\n    git pull\r\nelse\r\n    git clone https://github.com/ATLauncher/discord-bot.git .  \r\nfi\r\n\r\necho '{}' > config/local.json\r\n\r\nnpm install --production\r\n\r\nnpm run build\r\n\r\nrm Dockerfile\r\nrm CONTRIBUTING.md\r\nrm README.md\r\nrm /config/.gitignore\r\nrm CODE_OF_CONDUCT.md\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+            "entrypoint": "bash"
         }
     },
     "variables": [
@@ -49,5 +49,9 @@
             "rules": "required|string|max:20",
             "field_type": "text"
         }
-    ]
+    ],
+    "tags": [
+        "bots"
+    ],
+    "uuid": "17ab58cf-3af2-57cf-b499-6f46de8b9d79"
 }

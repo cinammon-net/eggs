@@ -24,7 +24,7 @@
     "file_denylist": [],
     "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -jar {{SERVER_JARFILE}}",
     "config": {
-        "files": "{\n    \"config.yml\": {\n        \"parser\": \"yaml\",\n        \"find\": {\n            \"listeners[0].query_port\": \"{{server.build.default.port}}\",\n            \"listeners[0].host\": \"0.0.0.0:{{server.build.default.port}}\",\n            \"servers.*.address\": {\n                \"regex:^(127\\\\.0\\\\.0\\\\.1|localhost)(:\\\\d{1,5})?$\": \"{{config.docker.interface}}$2\"\n            }\n        }\n    }\n}",
+        "files": "\"{\\n    \\\"config.yml\\\": {\\n        \\\"parser\\\": \\\"yaml\\\",\\n        \\\"find\\\": {\\n            \\\"listeners[0].query_port\\\": \\\"{{server.build.default.port}}\\\",\\n            \\\"listeners[0].host\\\": \\\"0.0.0.0:{{server.build.default.port}}\\\",\\n            \\\"servers.*.address\\\": {\\n                \\\"regex:^(127\\\\\\\\.0\\\\\\\\.0\\\\\\\\.1|localhost)(:\\\\\\\\d{1,5})?$\\\": \\\"{{config.docker.interface}}$2\\\"\\n            }\\n        }\\n    }\\n}\"",
         "startup": "{\n    \"done\": \"Listening on \"\n}",
         "logs": "[]",
         "stop": "end"
@@ -44,7 +44,7 @@
             "default_value": "bungeecord.jar",
             "user_viewable": true,
             "user_editable": true,
-            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "rules": "\"required|regex:\\/^([\\\\w\\\\d._-]+)(\\\\.jar)$\\/\"",
             "field_type": "text"
         },
         {
@@ -54,7 +54,7 @@
             "default_value": "latest",
             "user_viewable": true,
             "user_editable": true,
-            "rules": "required|alpha_num|between:1,6",
+            "rules": "\"required|alpha_num|between:1,6\"",
             "field_type": "text"
         }
     ],

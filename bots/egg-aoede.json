@@ -4,12 +4,11 @@
         "version": "PTDL_v2",
         "update_url": "https://raw.githubusercontent.com/cinammon-net/eggs/main/bots/egg-aoede.json"
     },
-    "uuid": "d8bd65db-3fd2-5e37-ae41-fc17ee2117a8",
     "exported_at": "2025-07-03T09:54:26-07:00",
     "name": "Aoede",
     "author": "contact@bldy.ovh",
     "description": "Aoede is a Discord music bot that directly streams from Spotify to Discord. The only interface is Spotify itself.",
-    "features": null,
+    "features": [],
     "docker_images": {
         "ghcr.io/parkervcp/yolks:ubuntu": "ghcr.io/parkervcp/yolks:ubuntu"
     },
@@ -17,15 +16,15 @@
     "startup": "./aoede",
     "config": {
         "files": "{}",
-        "logs": "{}",
         "startup": "{\r\n    \"done\": \"Invite me with\"\r\n}",
+        "logs": "{}",
         "stop": "^C"
     },
     "scripts": {
         "installation": {
+            "script": "## Credits: Red-Thirten (https://github.com/redthirten) for providing most of the installation script\n## Credits to TubaApollo & QuintenQVD0 for the Muse egg that helped build most of this one\napt-get update\napt-get install git curl jq cmake -y -qq\n\nGITHUB_PACKAGE=\"codetheweb/aoede\"\n\n# Find GitHub download URL for Muse for specified version\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases/latest\")\nRELEASES=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases\")\n\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq -r '.tarball_url')\nelse\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tarball_url')\n    else\n        echo -e \"Could not find version \\\"${VERSION}\\\" of Muse. Defaulting to latest release...\"\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq -r '.tarball_url')\n    fi\nfi\n\n# Download Aoede from GitHub & Extract\n## Cinammon: si la API de GitHub no responde (límite por hora), usar el enlace normal de la última versión\nif [ -z \"${DOWNLOAD_URL}\" ] || [ \"${DOWNLOAD_URL}\" == \"null\" ]; then\n    TAG_URL=$(curl -sIL \"https://github.com/${GITHUB_PACKAGE}/releases/latest\" | grep -i '^location:.*/releases/tag/' | tail -1 | tr -d '\\r' | awk '{print $2}')\n    REPO_PATH=$(echo \"${TAG_URL}\" | sed -E 's#https://github.com/([^/]+/[^/]+)/releases/tag/.*#\\1#')\n    TAG=${TAG_URL##*/tag/}\n    DOWNLOAD_URL=\"https://github.com/${REPO_PATH}/archive/refs/tags/${TAG}.tar.gz\"\n    echo \"Descargando ${REPO_PATH} ${TAG}\"\nfi\ncd /mnt/server\necho -e \"Downloading Aoede from GitHub...\"\ncurl -L ${DOWNLOAD_URL} -o aoede.tar.gz\necho -e \"Extracting Aoede from tarball...\"\ntar -xvzf aoede.tar.gz --strip-components=1\nrm aoede.tar.gz\n\n# Verify and clean up Aoede installation\nif [ ! -f Cargo.toml ]; then\n    echo -e \"\\nFailed to download release: ${DOWNLOAD_URL}\\n\"\n    exit 1\nfi\nrm -rf .dockerignore Dockerfile .gitignore .github/\ncargo build --release\nmv target/release/aoede .\ncargo clean\n\n\necho -e \"\\nAoede Successfully Installed!\"",
             "container": "rust:1.74-slim",
-            "entrypoint": "bash",
-            "script": "## Credits: Red-Thirten (https://github.com/redthirten) for providing most of the installation script\r\n## Credits to TubaApollo & QuintenQVD0 for the Muse egg that helped build most of this one\r\napt-get update\r\napt-get install git curl jq cmake -y -qq\r\n\r\nGITHUB_PACKAGE=\"codetheweb/aoede\"\r\n\r\n# Find GitHub download URL for Muse for specified version\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq -r '.tarball_url')\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tarball_url')\r\n    else\r\n        echo -e \"Could not find version \\\"${VERSION}\\\" of Muse. Defaulting to latest release...\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq -r '.tarball_url')\r\n    fi\r\nfi\r\n\r\n# Download Aoede from GitHub & Extract\r\ncd /mnt/server\r\necho -e \"Downloading Aoede from GitHub...\"\r\ncurl -L ${DOWNLOAD_URL} -o aoede.tar.gz\r\necho -e \"Extracting Aoede from tarball...\"\r\ntar -xvzf aoede.tar.gz --strip-components=1\r\nrm aoede.tar.gz\r\n\r\n# Verify and clean up Aoede installation\r\nif [ ! -f Cargo.toml ]; then\r\n    echo -e \"\\nFailed to download release: ${DOWNLOAD_URL}\\n\"\r\n    exit 1\r\nfi\r\nrm -rf .dockerignore Dockerfile .gitignore .github/\r\ncargo build --release\r\nmv target/release/aoede .\r\ncargo clean\r\n\r\n\r\necho -e \"\\nAoede Successfully Installed!\""
+            "entrypoint": "bash"
         }
     },
     "variables": [
@@ -89,5 +88,9 @@
             "rules": "required|string",
             "field_type": "text"
         }
-    ]
+    ],
+    "tags": [
+        "bots"
+    ],
+    "uuid": "d8bd65db-3fd2-5e37-ae41-fc17ee2117a8"
 }

@@ -25,7 +25,7 @@
     "file_denylist": [],
     "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -Dterminal.jline=false -Dterminal.ansi=true -jar {{SERVER_JARFILE}}",
     "config": {
-        "files": "{\r\n    \"server.properties\": {\r\n        \"parser\": \"properties\",\r\n        \"find\": {\r\n            \"server-ip\": \"0.0.0.0\",\r\n            \"server-port\": \"{{server.build.default.port}}\",\r\n            \"query.port\": \"{{server.build.default.port}}\"\r\n        }\r\n    }\r\n}",
+        "files": "\"{\\r\\n    \\\"server.properties\\\": {\\r\\n        \\\"parser\\\": \\\"properties\\\",\\r\\n        \\\"find\\\": {\\r\\n            \\\"server-ip\\\": \\\"0.0.0.0\\\",\\r\\n            \\\"server-port\\\": \\\"{{server.build.default.port}}\\\",\\r\\n            \\\"query.port\\\": \\\"{{server.build.default.port}}\\\"\\r\\n        }\\r\\n    }\\r\\n}\"",
         "startup": "{\r\n    \"done\": \")! For help, type \"\r\n}",
         "logs": "{}",
         "stop": "stop"
@@ -45,7 +45,8 @@
             "default_value": "latest",
             "user_viewable": true,
             "user_editable": true,
-            "rules": "nullable|string|max:20"
+            "rules": "\"nullable|string|max:20\"",
+            "field_type": "text"
         },
         {
             "name": "Server Jar File",
@@ -54,7 +55,8 @@
             "default_value": "server.jar",
             "user_viewable": true,
             "user_editable": true,
-            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/"
+            "rules": "\"required|regex:\\/^([\\\\w\\\\d._-]+)(\\\\.jar)$\\/\"",
+            "field_type": "text"
         },
         {
             "name": "Download Path",
@@ -63,7 +65,8 @@
             "default_value": "",
             "user_viewable": false,
             "user_editable": false,
-            "rules": "nullable|string"
+            "rules": "\"nullable|string\"",
+            "field_type": "text"
         },
         {
             "name": "Build Number",
@@ -72,7 +75,8 @@
             "default_value": "latest",
             "user_viewable": true,
             "user_editable": true,
-            "rules": "required|string|max:20"
+            "rules": "\"required|string|max:20\"",
+            "field_type": "text"
         }
     ],
     "uuid": "bea22443-441c-41c1-a837-7a8895c23792",

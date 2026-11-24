@@ -24,7 +24,7 @@
     "file_denylist": [],
     "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -jar {{SERVER_JARFILE}}",
     "config": {
-        "files": "{\n    \"server.properties\": {\n        \"parser\": \"properties\",\n        \"find\": {\n            \"server-ip\": \"\",\n            \"server-port\": \"{{server.build.default.port}}\",\n            \"query.port\": \"{{server.build.default.port}}\"\n        }\n    }\n}",
+        "files": "\"{\\n    \\\"server.properties\\\": {\\n        \\\"parser\\\": \\\"properties\\\",\\n        \\\"find\\\": {\\n            \\\"server-ip\\\": \\\"\\\",\\n            \\\"server-port\\\": \\\"{{server.build.default.port}}\\\",\\n            \\\"query.port\\\": \\\"{{server.build.default.port}}\\\"\\n        }\\n    }\\n}\"",
         "startup": "{\n    \"done\": \")! For help, type \"\n}",
         "logs": "[]",
         "stop": "stop"
@@ -44,7 +44,7 @@
             "default_value": "server.jar",
             "user_viewable": true,
             "user_editable": true,
-            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "rules": "\"required|regex:\\/^([\\\\w\\\\d._-]+)(\\\\.jar)$\\/\"",
             "field_type": "text"
         },
         {
@@ -54,7 +54,7 @@
             "default_value": "latest",
             "user_viewable": true,
             "user_editable": true,
-            "rules": "required|string|between:3,15",
+            "rules": "\"required|string|between:3,15\"",
             "field_type": "text"
         }
     ],
