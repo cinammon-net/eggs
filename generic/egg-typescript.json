@@ -1,0 +1,152 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY FOR CINAMMON.NET",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": "https://raw.githubusercontent.com/cinammon-net/eggs/main/generic/egg-typescript.json"
+    },
+    "exported_at": "2024-04-02T14:19:30+02:00",
+    "name": "TypeScript (Node.js)",
+    "author": "support@cinammon.net",
+    "description": "Bots y apps en TypeScript. Al arrancar instala las dependencias, compila los .ts (tsconfig.json) y arranca lo compilado (dist/index.js por defecto). Solo tienes que subir tus .ts y reiniciar: no hace falta subir la carpeta dist.\n\nSi el servidor está vacío y sin repositorio, instala una plantilla de bot de Discord en TypeScript.",
+    "features": null,
+    "docker_images": {
+        "Nodejs 24": "ghcr.io/parkervcp/yolks:nodejs_24",
+        "Nodejs 22": "ghcr.io/parkervcp/yolks:nodejs_22",
+        "Nodejs 21": "ghcr.io/parkervcp/yolks:nodejs_21",
+        "Nodejs 20": "ghcr.io/parkervcp/yolks:nodejs_20",
+        "Nodejs 19": "ghcr.io/parkervcp/yolks:nodejs_19",
+        "Nodejs 18": "ghcr.io/parkervcp/yolks:nodejs_18",
+        "Nodejs 17": "ghcr.io/parkervcp/yolks:nodejs_17",
+        "Nodejs 16": "ghcr.io/parkervcp/yolks:nodejs_16",
+        "Nodejs 14": "ghcr.io/parkervcp/yolks:nodejs_14",
+        "Nodejs 12": "ghcr.io/parkervcp/yolks:nodejs_12"
+    },
+    "file_denylist": [],
+    "startup": "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; if [[ ! -z ${NODE_PACKAGES} ]]; then /usr/local/bin/npm install ${NODE_PACKAGES}; fi; if [ -f /home/container/package.json ]; then /usr/local/bin/npm install --include=dev; fi; if [[ ! -z \"${BUILD_CMD}\" ]]; then echo \"[Cinammon] Compilando: ${BUILD_CMD}\"; bash -c \"${BUILD_CMD}\" || echo \"[Cinammon] La compilación avisó de errores: se arranca con lo que se pudo compilar.\"; elif [ -f \"/home/container/${TS_CONFIG}\" ]; then echo \"[Cinammon] Compilando TypeScript (${TS_CONFIG})...\"; if [ -x /home/container/node_modules/.bin/tsc ]; then /home/container/node_modules/.bin/tsc -p \"${TS_CONFIG}\"; else /usr/local/bin/npx -y -p typescript@5 tsc -p \"${TS_CONFIG}\"; fi || echo \"[Cinammon] TypeScript avisó de errores: se arranca con lo que se pudo compilar.\"; else echo \"[Cinammon] No hay ${TS_CONFIG}: se arranca sin compilar.\"; fi; if [ ! -f \"/home/container/${MAIN_FILE}\" ]; then echo \"[Cinammon] No existe ${MAIN_FILE}. Revisa \\\"Main file\\\" en Startup (por ejemplo dist/index.js).\"; fi; /usr/local/bin/node \"/home/container/${MAIN_FILE}\" ${NODE_ARGS}",
+    "config": {
+        "files": "{}",
+        "startup": "{\n    \"done\": [\n        \"Conectado como\",\n        \"Falta el token\",\n        \"El token no es válido\",\n        \"No se pudo conectar\",\n        \"Logged in as\",\n        \"logged in as\",\n        \"is online\",\n        \"is ready\",\n        \"Ready!\",\n        \"Sesion Discord Gateway v10 activa\",\n        \"[READY]\"\n    ]\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/bash\n# NodeJS App Installation Script\n#\n# Server Files: /mnt/server\napt update\napt install -y git curl jq file unzip make gcc g++ python3 python3-dev python3-pip libtool\n\necho -e \"updating npm. please wait...\"\nnpm install npm@latest --location=global\n\nmkdir -p /mnt/server\ncd /mnt/server\n\nif [ \"${USER_UPLOAD}\" == \"true\" ] || [ \"${USER_UPLOAD}\" == \"1\" ]; then\n    echo -e \"assuming user knows what they are doing have a good day.\"\n    exit 0\nfi\n\n## Plantilla de Cinammon (TypeScript): servidor vacío y sin repositorio -> bot de Discord en TypeScript\nif [ -z \"${GIT_ADDRESS}\" ] && [ -z \"$(ls -A /mnt/server 2>/dev/null)\" ]; then\n    cd /mnt/server\n    echo \"Servidor vacío y sin repositorio: instalando la plantilla de bot de Discord en TypeScript de Cinammon\"\n    mkdir -p src\n    cat > package.json <<'CINEOF'\n{\n  \"name\": \"bot-discord-ts\",\n  \"version\": \"1.0.0\",\n  \"description\": \"Bot de Discord en TypeScript - plantilla de Cinammon\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"main\": \"dist/index.js\",\n  \"scripts\": { \"build\": \"tsc\", \"start\": \"node dist/index.js\" },\n  \"dependencies\": { \"discord.js\": \"^14.16.3\" },\n  \"devDependencies\": { \"typescript\": \"^5.6.3\", \"@types/node\": \"^22.9.0\" }\n}\nCINEOF\n    cat > tsconfig.json <<'CINEOF'\n{\n  \"compilerOptions\": {\n    \"target\": \"ES2022\",\n    \"module\": \"NodeNext\",\n    \"moduleResolution\": \"NodeNext\",\n    \"outDir\": \"./dist\",\n    \"rootDir\": \"./src\",\n    \"strict\": true,\n    \"esModuleInterop\": true,\n    \"skipLibCheck\": true\n  },\n  \"include\": [\"src/**/*\"]\n}\nCINEOF\n    cat > src/index.ts <<'CINEOF'\n/**\n * Bot de Discord en TypeScript · plantilla de Cinammon\n *\n * Edita los archivos de src/ (por SFTP o desde Archivos) y reinicia: el servidor compila solo a dist/.\n * Token: pégalo en \"Conexión con Discord\" de la consola del panel (o pon DISCORD_TOKEN).\n */\nimport fs from 'node:fs';\nimport { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder, ChatInputCommandInteraction } from 'discord.js';\n\ntype Comando = { data: SlashCommandBuilder; run: (i: ChatInputCommandInteraction) => Promise<unknown> };\n\nconst COMANDOS: Comando[] = [\n    { data: new SlashCommandBuilder().setName('ping').setDescription('Comprueba que el bot responde'),\n      run: (i) => i.reply({ content: `Pong. Latencia: ${Math.round(i.client.ws.ping)} ms`, ephemeral: true }) },\n    { data: new SlashCommandBuilder().setName('ayuda').setDescription('Lista de comandos'),\n      run: (i) => i.reply({ content: COMANDOS.map((c) => `**/${c.data.name}** · ${c.data.description}`).join('\\n'), ephemeral: true }) },\n];\n\nfunction config(): { token?: string; guild_id?: string } {\n    try { return JSON.parse(fs.readFileSync('bot-config.json', 'utf8')); } catch { return {}; }\n}\n\nconst cfg = config();\nconst token = String(cfg.token || process.env.DISCORD_TOKEN || '').trim();\nif (!token) {\n    console.log('Falta el token. Pégalo en el recuadro \"Conexión con Discord\" de la consola y el bot se reiniciará solo.');\n    setInterval(() => {}, 60_000);\n} else {\n    const client = new Client({ intents: [GatewayIntentBits.Guilds] });\n    client.once('ready', async (c) => {\n        console.log(`Conectado como ${c.user.tag} en ${c.guilds.cache.size} servidor(es). [READY]`);\n        const rest = new REST().setToken(token);\n        const body = COMANDOS.map((x) => x.data.toJSON());\n        const guild = String(cfg.guild_id || process.env.GUILD_ID || '').trim();\n        await rest.put(guild ? Routes.applicationGuildCommands(c.user.id, guild) : Routes.applicationCommands(c.user.id), { body })\n            .catch((e: Error) => console.log(`No se pudieron registrar los comandos: ${e.message}`));\n    });\n    client.on('interactionCreate', async (i) => {\n        if (!i.isChatInputCommand()) return;\n        const cmd = COMANDOS.find((x) => x.data.name === i.commandName);\n        if (cmd) await cmd.run(i).catch((e: Error) => console.log(`/${i.commandName}: ${e.message}`));\n    });\n    client.login(token).catch((e: Error) => console.log(`El token no es válido o no se pudo conectar: ${e.message}`));\n}\nCINEOF\n    npm install --include=dev\n    npx tsc -p tsconfig.json || true\n    echo \"Plantilla TypeScript instalada. Edita src/index.ts y reinicia: se compila solo.\"\n    exit 0\nfi\n\n## add git ending if it's not on the address\nif [[ ${GIT_ADDRESS} != *.git ]]; then\n    GIT_ADDRESS=${GIT_ADDRESS}.git\nfi\n\nif [ -z \"${USERNAME}\" ] && [ -z \"${ACCESS_TOKEN}\" ]; then\n    echo -e \"using anon api call\"\nelse\n    GIT_ADDRESS=\"https://${USERNAME}:${ACCESS_TOKEN}@$(echo -e ${GIT_ADDRESS} | cut -d/ -f3-)\"\nfi\n\n## pull git js repo\nif [ \"$(ls -A /mnt/server)\" ]; then\n    echo -e \"/mnt/server directory is not empty.\"\n    if [ -d .git ]; then\n        echo -e \".git directory exists\"\n        if [ -f .git/config ]; then\n            echo -e \"loading info from git config\"\n            ORIGIN=$(git config --get remote.origin.url)\n        else\n            echo -e \"files found with no git config\"\n            echo -e \"closing out without touching things to not break anything\"\n            exit 10\n        fi\n    fi\n\n    if [ \"${ORIGIN}\" == \"${GIT_ADDRESS}\" ]; then\n        echo \"pulling latest from github\"\n        git pull\n    fi\nelse\n    echo -e \"/mnt/server is empty.\\ncloning files into repo\"\n    if [ -z ${BRANCH} ]; then\n        echo -e \"cloning default branch\"\n        git clone ${GIT_ADDRESS} .\n    else\n        echo -e \"cloning ${BRANCH}'\"\n        git clone --single-branch --branch ${BRANCH} ${GIT_ADDRESS} .\n    fi\n\nfi\n\necho \"Installing nodejs packages\"\nif [[ ! -z ${NODE_PACKAGES} ]]; then\n    /usr/local/bin/npm install ${NODE_PACKAGES}\nfi\n\nif [ -f /mnt/server/package.json ]; then\n    /usr/local/bin/npm install --production\nfi\n\necho -e \"install complete\"\nexit 0",
+            "container": "node:18-bookworm-slim",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Git Repo Address",
+            "description": "GitHub Repo to clone\r\n\r\nI.E. https://github.com/parkervcp/repo_name",
+            "env_variable": "GIT_ADDRESS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Install Branch",
+            "description": "The branch to install.",
+            "env_variable": "BRANCH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "User Uploaded Files",
+            "description": "Skip all the install stuff if you are letting a user upload files.\r\n\r\n0 = false (default)\r\n1 = true",
+            "env_variable": "USER_UPLOAD",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Auto Update",
+            "description": "Pull the latest files on startup when using a GitHub repo.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Additional Node packages",
+            "description": "Install additional node packages.\r\n\r\nUse spaces to separate.",
+            "env_variable": "NODE_PACKAGES",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Git Username",
+            "description": "Username to auth with git.",
+            "env_variable": "USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Git Access Token",
+            "description": "Password to use with git.\r\n\r\nIt's best practice to use a Personal Access Token.\r\nhttps://github.com/settings/tokens\r\nhttps://gitlab.com/-/profile/personal_access_tokens",
+            "env_variable": "ACCESS_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Archivo compilado",
+            "description": "El archivo que arranca después de compilar (normalmente dist/index.js).",
+            "env_variable": "MAIN_FILE",
+            "default_value": "dist/index.js",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Additional Arguments.",
+            "description": "Any extra arguments for nodejs or ts-node",
+            "env_variable": "NODE_ARGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "tsconfig",
+            "description": "Archivo de configuración de TypeScript. Si existe, se compila al arrancar.",
+            "env_variable": "TS_CONFIG",
+            "default_value": "tsconfig.json",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Comando de compilación",
+            "description": "Opcional. Si lo pones, se usa en vez de tsc (por ejemplo: npm run build).",
+            "env_variable": "BUILD_CMD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+        }
+    ],
+    "uuid": "383510f5-ff9b-47c5-aeeb-644e07514e9c"
+}
