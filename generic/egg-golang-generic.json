@@ -16,7 +16,7 @@
     "startup": "./${EXECUTABLE}",
     "config": {
         "files": "{}",
-        "startup": "{\r\n    \"done\": \"change this part\"\r\n}",
+        "startup": "{\n    \"done\": [\n        \"escuchando en\",\n        \"todas las herramientas están listas\",\n        \"listening on\",\n        \"Listening on\",\n        \"Server started\",\n        \"server started\",\n        \"is running\",\n        \"Ready\"\n    ]\n}",
         "logs": "{}",
         "stop": "^C"
     },
