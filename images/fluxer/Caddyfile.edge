@@ -1,0 +1,66 @@
+# Puerta de entrada de Fluxer. Cinammon pone el HTTPS (Cloudflare + nginx), aquí va en HTTP.
+{
+	auto_https off
+	admin off
+	persist_config off
+	servers {
+		trusted_proxies static private_ranges
+		client_ip_headers X-Forwarded-For X-Real-IP
+		protocols h1 h2
+	}
+}
+(upstream) {
+	reverse_proxy {args[0]} {
+		header_up X-Forwarded-For {client_ip}
+		header_up X-Real-IP {client_ip}
+		header_up X-Forwarded-Proto https
+		header_up -Forwarded
+	}
+}
+:{$SERVER_PORT} {
+	encode zstd gzip
+	request_body {
+		max_size 512MB
+	}
+	handle /_health {
+		respond "OK" 200
+	}
+	handle_path /api/* {
+		import upstream 127.0.0.1:{$P_API}
+	}
+	handle /gateway {
+		rewrite * /
+		import upstream 127.0.0.1:{$P_GATEWAY}
+	}
+	handle_path /gateway/* {
+		import upstream 127.0.0.1:{$P_GATEWAY}
+	}
+	handle_path /media/* {
+		import upstream 127.0.0.1:{$P_MEDIA}
+	}
+	handle /admin {
+		rewrite * /
+		import upstream 127.0.0.1:{$P_ADMIN}
+	}
+	handle_path /admin/* {
+		import upstream 127.0.0.1:{$P_ADMIN}
+	}
+	@staticAssets path /web/* /emoji/* /libs/* /avatars/* /badges/* /desktop/*
+	handle @staticAssets {
+		import upstream 127.0.0.1:{$P_STATIC}
+	}
+	handle /.well-known/fluxer {
+		import upstream 127.0.0.1:{$P_API}
+	}
+	handle /.well-known/webfinger {
+		import upstream 127.0.0.1:{$P_API}
+	}
+	handle {
+		import upstream 127.0.0.1:{$P_APP}
+	}
+}
+127.0.0.1:{$P_DISCOVERY} {
+	handle /.well-known/fluxer {
+		import upstream 127.0.0.1:{$P_API}
+	}
+}

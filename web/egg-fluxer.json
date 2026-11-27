@@ -1,0 +1,53 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY FOR CINAMMON.NET",
+    "meta": {
+        "version": "PLCN_v1",
+        "update_url": null
+    },
+    "uuid": "ee81d4a7-dd33-4ffe-86fa-4dd68b64f53c",
+    "exported_at": "2026-11-27T00:00:00Z",
+    "name": "Fluxer (chat propio)",
+    "author": "support@cinammon.net",
+    "description": "Tu propio Fluxer: una app de chat como Discord (servidores, canales, mensajes, archivos), en tu dirección nombre-xxxx.cinammon.net con HTTPS. Todo va en un solo servidor: base de datos, colas y las piezas de Fluxer. Al primer arranque la consola muestra un código para crear tu cuenta de administrador. Necesita al menos 4 GB de RAM. La voz y el vídeo todavía no están incluidos.",
+    "features": [],
+    "docker_images": {
+        "Fluxer (Cinammon)": "ghcr.io/cinammon-net/fluxer:latest"
+    },
+    "file_denylist": [],
+    "startup": "fluxer-run",
+    "config": {
+        "files": "{}",
+        "startup": "{\"done\": [\"Tu Fluxer está en marcha\"]}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/bash\n# Fluxer de Cinammon: todo viene en la imagen. Solo se prepara la carpeta de datos.\nmkdir -p /mnt/server/data\nchown -R 988:988 /mnt/server 2>/dev/null || true\necho \"[Cinammon] Fluxer listo. Enciende el servidor: la consola te dará el código para crear tu cuenta.\"\n",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Nombre de tu Fluxer",
+            "description": "Cómo se llama tu Fluxer en la app (vacío = Fluxer).",
+            "env_variable": "FLUXER_APP_PRODUCT_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:40",
+            "field_type": "text"
+        },
+        {
+            "name": "Memoria de la API (MB)",
+            "description": "Memoria máxima de la pieza principal. Súbela solo si tienes mucha gente.",
+            "env_variable": "FLUXER_API_HEAP_MB",
+            "default_value": "768",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:384,4096",
+            "field_type": "text"
+        }
+    ]
+}

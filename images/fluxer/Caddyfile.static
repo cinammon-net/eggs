@@ -1,0 +1,24 @@
+{
+	auto_https off
+	admin off
+	persist_config off
+	default_bind 127.0.0.1
+	servers {
+		protocols h1 h2
+	}
+}
+:{$P_STATIC} {
+	root * /srv/fluxer-static
+	encode zstd gzip
+	@health path /_health
+	respond @health "OK" 200
+	@hidden path /.*
+	respond @hidden "Not Found" 404
+	header {
+		X-Content-Type-Options nosniff
+		Access-Control-Allow-Origin *
+		Cache-Control "public, max-age=3600, must-revalidate"
+		-Server
+	}
+	file_server
+}
